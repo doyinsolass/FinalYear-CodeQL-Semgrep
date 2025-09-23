@@ -1,7 +1,7 @@
 name: "CodeQL Scan"
 
 on:
-  workflow_dispatch:  # Manual trigger only
+  push:
 
 jobs:
   analyze:
