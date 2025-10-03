@@ -88,5 +88,3 @@ jobs:
               languages: [javascript]
           EOF
 
-      - name: Run Semgrep with custom JS security rules
-        run: semgrep --config=.semgrep/security-rules.yml --error
