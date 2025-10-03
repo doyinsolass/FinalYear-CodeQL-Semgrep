@@ -24,6 +24,74 @@ jobs:
       - name: Install Semgrep
         run: pip install semgrep
 
-      - name: Run Semgrep with custom security rules
+      - name: Write Semgrep custom JS security rules
         run: |
-          semgrep --config=.semgrep/security-rules.yml --error
+          mkdir -p .semgrep
+          cat <<'EOF' > .semgrep/security-rules.yml
+          rules:
+            - id: detect-hardcoded-aws-secret-js
+              pattern: const aws_secret_access_key = "$SECRET"
+              message: "Hardcoded AWS secret detected."
+              severity: ERROR
+              languages: [javascript]
+
+            - id: detect-console-log-debug
+              pattern: console.log($X)
+              message: "Debug console.log statement found; remove before production."
+              severity: WARNING
+              languages: [javascript]
+
+            - id: detect-eval-usage-js
+              pattern: eval($EXPR)
+              message: "Use of eval() in JavaScript can lead to code injection vulnerabilities."
+              severity: ERROR
+              languages: [javascript]
+
+            - id: detect-function-constructor
+              pattern: new Function($ARGS)
+              message: "Use of Function constructor can lead to security issues."
+              severity: ERROR
+              languages: [javascript]
+
+            - id: detect-settimeout-string
+              pattern: setTimeout($CODE, $TIME)
+              message: "setTimeout with a string argument can lead to code injection."
+              severity: ERROR
+              languages: [javascript]
+              pattern-either:
+                - pattern: setTimeout("$CODE", ...)
+                - pattern: setInterval("$CODE", ...)
+
+            - id: detect-document-write-js
+              pattern: document.write($X)
+              message: "document.write() can lead to XSS vulnerabilities."
+              severity: ERROR
+              languages: [javascript]
+
+            - id: detect-innerhtml-assignment
+              pattern: $OBJ.innerHTML = $VAL
+              message: "Assignment to innerHTML can lead to XSS vulnerabilities."
+              severity: ERROR
+              languages: [javascript]
+
+            - id: detect-localstorage-usage
+              pattern: localStorage.setItem($KEY, $VAL)
+              message: "Sensitive data should not be stored in localStorage."
+              severity: WARNING
+              languages: [javascript]
+
+            - id: detect-unsafe-regex
+              pattern: new RegExp($PATTERN)
+              message: "Potentially unsafe RegExp. Consider static regex or validating input."
+              severity: WARNING
+              languages: [javascript]
+
+            - id: detect-insecure-http
+              pattern: fetch("http://$URL", ...)
+              message: "Fetching over HTTP can expose data in transit. Use HTTPS."
+              severity: ERROR
+              languages: [javascript]
+          EOF
+
+      - name: Run Semgrep with custom JS security rules
+        run: semgrep --config=.semgrep/security-rules.yml --error
