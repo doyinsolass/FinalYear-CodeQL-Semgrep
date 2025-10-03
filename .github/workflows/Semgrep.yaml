@@ -2,10 +2,6 @@ name: Semgrep Security Scan
 
 on:
   push:
-    branches:
-      - main
-      - master
-  pull_request:
 
 jobs:
   semgrep:
@@ -54,13 +50,12 @@ jobs:
               languages: [javascript]
 
             - id: detect-settimeout-string
-              pattern: setTimeout($CODE, $TIME)
-              message: "setTimeout with a string argument can lead to code injection."
-              severity: ERROR
-              languages: [javascript]
               pattern-either:
                 - pattern: setTimeout("$CODE", ...)
                 - pattern: setInterval("$CODE", ...)
+              message: "setTimeout/setInterval with a string argument can lead to code injection."
+              severity: ERROR
+              languages: [javascript]
 
             - id: detect-document-write-js
               pattern: document.write($X)
