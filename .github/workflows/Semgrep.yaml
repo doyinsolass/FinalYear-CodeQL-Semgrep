@@ -1,31 +1,29 @@
-name: "Semgrep Scan"
+name: Semgrep Security Scan
 
 on:
-  push:
-
-jobs:
-  semgrep:
-    name: Scan
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: returntocorp/semgrep-action@v1
-      with:
-        publishToken: abc
-
-
----
-on:
-  pull_request: {}
   push:
     branches:
-name: Semgrep
+      - main
+      - master
+  pull_request:
+
 jobs:
   semgrep:
-    name: Scan
+    name: Run Semgrep Security Scan
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v2
-    - uses: returntocorp/semgrep-action@v1
-      with:
-        publishToken: abc
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python (for Semgrep CLI)
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Run Semgrep with custom security rules
+        run: |
+          semgrep --config=.semgrep/security-rules.yml --error
