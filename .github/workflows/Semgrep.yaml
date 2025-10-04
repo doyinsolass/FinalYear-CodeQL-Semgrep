@@ -25,9 +25,10 @@ jobs:
         run: pip install semgrep
 
       - name: Write Semgrep custom JS security rules
+        shell: bash
         run: |
           mkdir -p .semgrep
-          cat <<'EOF' > .semgrep/security-rules.yml
+          cat > .semgrep/security-rules.yml <<'EOF'
 rules:
   - id: detect-hardcoded-aws-secret-js
     pattern: const aws_secret_access_key = "$SECRET"
@@ -93,9 +94,10 @@ rules:
 EOF
 
       - name: Run Semgrep with custom JS security rules and output SARIF
-        run: semgrep --config=.semgrep/security-rules.yml --sarif --output=semgrep-results.sarif || true
+        run: semgrep --config=.semgrep/security-rules.yml --sarif --output=semgrep-results.sarif
+        continue-on-error: true
 
       - name: Upload SARIF file to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: semgrep-results.sarif
+          sarif_file: "semgrep-results.sarif"
