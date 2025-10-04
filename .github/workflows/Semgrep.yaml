@@ -2,6 +2,8 @@ name: Semgrep Security Scan
 
 on:
   push:
+    branches:
+      - main
 
 jobs:
   semgrep:
@@ -20,74 +22,71 @@ jobs:
       - name: Install Semgrep
         run: pip install semgrep
 
-      - name: Create custom JavaScript security rules
-        shell: bash
+      - name: Write custom JavaScript security rules
         run: |
           mkdir -p .semgrep
-          cat > .semgrep/security-rules.yml <<'EOF'
-rules:
-  - id: detect-hardcoded-aws-secret-js
-    pattern: const aws_secret_access_key = "$SECRET"
-    message: "Hardcoded AWS secret detected."
-    severity: ERROR
-    languages: [javascript]
-
-  - id: detect-console-log-debug
-    pattern: console.log($X)
-    message: "Debug console.log statement found; remove before production."
-    severity: WARNING
-    languages: [javascript]
-
-  - id: detect-eval-usage-js
-    pattern: eval($EXPR)
-    message: "Use of eval() can lead to code injection vulnerabilities."
-    severity: ERROR
-    languages: [javascript]
-
-  - id: detect-function-constructor
-    pattern: new Function($ARGS)
-    message: "Use of Function constructor can lead to security issues."
-    severity: ERROR
-    languages: [javascript]
-
-  - id: detect-settimeout-string
-    pattern-either:
-      - pattern: setTimeout("$CODE", ...)
-      - pattern: setInterval("$CODE", ...)
-    message: "Avoid using string arguments in setTimeout/setInterval; potential code injection."
-    severity: ERROR
-    languages: [javascript]
-
-  - id: detect-document-write-js
-    pattern: document.write($X)
-    message: "document.write() can lead to XSS vulnerabilities."
-    severity: ERROR
-    languages: [javascript]
-
-  - id: detect-innerhtml-assignment
-    pattern: $OBJ.innerHTML = $VAL
-    message: "Assignment to innerHTML can lead to XSS vulnerabilities."
-    severity: ERROR
-    languages: [javascript]
-
-  - id: detect-localstorage-usage
-    pattern: localStorage.setItem($KEY, $VAL)
-    message: "Avoid storing sensitive data in localStorage."
-    severity: WARNING
-    languages: [javascript]
-
-  - id: detect-unsafe-regex
-    pattern: new RegExp($PATTERN)
-    message: "Potentially unsafe regular expression. Validate input or use static patterns."
-    severity: WARNING
-    languages: [javascript]
-
-  - id: detect-insecure-http
-    pattern: fetch("http://$URL", ...)
-    message: "Use HTTPS instead of HTTP for secure data transmission."
-    severity: ERROR
-    languages: [javascript]
-EOF
+          echo "rules:" > .semgrep/security-rules.yml
+          echo "  - id: detect-hardcoded-aws-secret-js" >> .semgrep/security-rules.yml
+          echo "    pattern: const aws_secret_access_key = \"\$SECRET\"" >> .semgrep/security-rules.yml
+          echo "    message: \"Hardcoded AWS secret detected.\"" >> .semgrep/security-rules.yml
+          echo "    severity: ERROR" >> .semgrep/security-rules.yml
+          echo "    languages: [javascript]" >> .semgrep/security-rules.yml
+          echo "" >> .semgrep/security-rules.yml
+          echo "  - id: detect-console-log-debug" >> .semgrep/security-rules.yml
+          echo "    pattern: console.log(\$X)" >> .semgrep/security-rules.yml
+          echo "    message: \"Debug console.log statement found; remove before production.\"" >> .semgrep/security-rules.yml
+          echo "    severity: WARNING" >> .semgrep/security-rules.yml
+          echo "    languages: [javascript]" >> .semgrep/security-rules.yml
+          echo "" >> .semgrep/security-rules.yml
+          echo "  - id: detect-eval-usage-js" >> .semgrep/security-rules.yml
+          echo "    pattern: eval(\$EXPR)" >> .semgrep/security-rules.yml
+          echo "    message: \"Use of eval() can lead to code injection vulnerabilities.\"" >> .semgrep/security-rules.yml
+          echo "    severity: ERROR" >> .semgrep/security-rules.yml
+          echo "    languages: [javascript]" >> .semgrep/security-rules.yml
+          echo "" >> .semgrep/security-rules.yml
+          echo "  - id: detect-function-constructor" >> .semgrep/security-rules.yml
+          echo "    pattern: new Function(\$ARGS)" >> .semgrep/security-rules.yml
+          echo "    message: \"Use of Function constructor can lead to security issues.\"" >> .semgrep/security-rules.yml
+          echo "    severity: ERROR" >> .semgrep/security-rules.yml
+          echo "    languages: [javascript]" >> .semgrep/security-rules.yml
+          echo "" >> .semgrep/security-rules.yml
+          echo "  - id: detect-settimeout-string" >> .semgrep/security-rules.yml
+          echo "    pattern-either:" >> .semgrep/security-rules.yml
+          echo "      - pattern: setTimeout(\"\$CODE\", ...)" >> .semgrep/security-rules.yml
+          echo "      - pattern: setInterval(\"\$CODE\", ...)" >> .semgrep/security-rules.yml
+          echo "    message: \"Avoid using string arguments in setTimeout/setInterval; potential code injection.\"" >> .semgrep/security-rules.yml
+          echo "    severity: ERROR" >> .semgrep/security-rules.yml
+          echo "    languages: [javascript]" >> .semgrep/security-rules.yml
+          echo "" >> .semgrep/security-rules.yml
+          echo "  - id: detect-document-write-js" >> .semgrep/security-rules.yml
+          echo "    pattern: document.write(\$X)" >> .semgrep/security-rules.yml
+          echo "    message: \"document.write() can lead to XSS vulnerabilities.\"" >> .semgrep/security-rules.yml
+          echo "    severity: ERROR" >> .semgrep/security-rules.yml
+          echo "    languages: [javascript]" >> .semgrep/security-rules.yml
+          echo "" >> .semgrep/security-rules.yml
+          echo "  - id: detect-innerhtml-assignment" >> .semgrep/security-rules.yml
+          echo "    pattern: \$OBJ.innerHTML = \$VAL" >> .semgrep/security-rules.yml
+          echo "    message: \"Assignment to innerHTML can lead to XSS vulnerabilities.\"" >> .semgrep/security-rules.yml
+          echo "    severity: ERROR" >> .semgrep/security-rules.yml
+          echo "    languages: [javascript]" >> .semgrep/security-rules.yml
+          echo "" >> .semgrep/security-rules.yml
+          echo "  - id: detect-localstorage-usage" >> .semgrep/security-rules.yml
+          echo "    pattern: localStorage.setItem(\$KEY, \$VAL)" >> .semgrep/security-rules.yml
+          echo "    message: \"Avoid storing sensitive data in localStorage.\"" >> .semgrep/security-rules.yml
+          echo "    severity: WARNING" >> .semgrep/security-rules.yml
+          echo "    languages: [javascript]" >> .semgrep/security-rules.yml
+          echo "" >> .semgrep/security-rules.yml
+          echo "  - id: detect-unsafe-regex" >> .semgrep/security-rules.yml
+          echo "    pattern: new RegExp(\$PATTERN)" >> .semgrep/security-rules.yml
+          echo "    message: \"Potentially unsafe regular expression. Validate input or use static patterns.\"" >> .semgrep/security-rules.yml
+          echo "    severity: WARNING" >> .semgrep/security-rules.yml
+          echo "    languages: [javascript]" >> .semgrep/security-rules.yml
+          echo "" >> .semgrep/security-rules.yml
+          echo "  - id: detect-insecure-http" >> .semgrep/security-rules.yml
+          echo "    pattern: fetch(\"http://\$URL\", ...)" >> .semgrep/security-rules.yml
+          echo "    message: \"Use HTTPS instead of HTTP for secure data transmission.\"" >> .semgrep/security-rules.yml
+          echo "    severity: ERROR" >> .semgrep/security-rules.yml
+          echo "    languages: [javascript]" >> .semgrep/security-rules.yml
 
       - name: Run Semgrep with custom rules and generate SARIF report
         run: semgrep --config=.semgrep/security-rules.yml --sarif --output=semgrep-results.sarif
