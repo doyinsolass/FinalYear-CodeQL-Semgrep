@@ -2,10 +2,6 @@ name: Semgrep Security Scan
 
 on:
   push:
-    branches:
-      - main
-      - master
-  pull_request:
 
 jobs:
   semgrep:
@@ -14,17 +10,17 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Set up Python (for Semgrep CLI)
-        uses: actions/setup-python@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
       - name: Install Semgrep
         run: pip install semgrep
 
-      - name: Write Semgrep custom JS security rules
+      - name: Create custom JavaScript security rules
         shell: bash
         run: |
           mkdir -p .semgrep
@@ -44,7 +40,7 @@ rules:
 
   - id: detect-eval-usage-js
     pattern: eval($EXPR)
-    message: "Use of eval() in JavaScript can lead to code injection vulnerabilities."
+    message: "Use of eval() can lead to code injection vulnerabilities."
     severity: ERROR
     languages: [javascript]
 
@@ -58,7 +54,7 @@ rules:
     pattern-either:
       - pattern: setTimeout("$CODE", ...)
       - pattern: setInterval("$CODE", ...)
-    message: "setTimeout/setInterval with a string argument can lead to code injection."
+    message: "Avoid using string arguments in setTimeout/setInterval; potential code injection."
     severity: ERROR
     languages: [javascript]
 
@@ -76,28 +72,28 @@ rules:
 
   - id: detect-localstorage-usage
     pattern: localStorage.setItem($KEY, $VAL)
-    message: "Sensitive data should not be stored in localStorage."
+    message: "Avoid storing sensitive data in localStorage."
     severity: WARNING
     languages: [javascript]
 
   - id: detect-unsafe-regex
     pattern: new RegExp($PATTERN)
-    message: "Potentially unsafe RegExp. Consider static regex or validating input."
+    message: "Potentially unsafe regular expression. Validate input or use static patterns."
     severity: WARNING
     languages: [javascript]
 
   - id: detect-insecure-http
     pattern: fetch("http://$URL", ...)
-    message: "Fetching over HTTP can expose data in transit. Use HTTPS."
+    message: "Use HTTPS instead of HTTP for secure data transmission."
     severity: ERROR
     languages: [javascript]
 EOF
 
-      - name: Run Semgrep with custom JS security rules and output SARIF
+      - name: Run Semgrep with custom rules and generate SARIF report
         run: semgrep --config=.semgrep/security-rules.yml --sarif --output=semgrep-results.sarif
         continue-on-error: true
 
-      - name: Upload SARIF file to GitHub Security tab
+      - name: Upload SARIF results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: "semgrep-results.sarif"
+          sarif_file: semgrep-results.sarif
