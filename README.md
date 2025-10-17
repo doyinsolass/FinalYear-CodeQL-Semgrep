@@ -16,7 +16,7 @@
 | **SAST Tools**   | Explain the 2 SAST tools being used, Semgrep and CodeQL. Elaborate on why I used them, what benefit these tools are and the importance of these tools in this project              |
 |  **CI/CD workflows**   | For this section I will explain what CI/CD is, the methodology and how benefitial it is. I will also explain how I created the workflows, how / where I learned YAML and talk about how the workflows run in GitHub Actions |
 |  **Vulnereable Projects** | I have imported 2 intentionally vulnerable projects, they are simply 2 web application with alot of faults in them. I will basically use these web applications to test my security rules; the goal is to see if my security rules can pick up a large number of faults inside each folder.             |
-|    | :white_check_mark: |
+|    | |
 
 # SDLC (Software Development Life Cycle)
 
