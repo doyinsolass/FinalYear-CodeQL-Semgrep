@@ -1,0 +1,9 @@
+{
+  "target": "./",
+  "languages": ["python", "javascript", "java"],
+  "output": "autogrep_rules.yml",
+  "max_patterns": 20,
+  "include_patterns": ["*.py", "*.js", "*.java"],
+  "exclude_patterns": ["tests/*"],
+  "threshold": 1
+}
