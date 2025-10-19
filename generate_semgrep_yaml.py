@@ -13,8 +13,11 @@ with open(input_json) as f:
     data = json.load(f)
 
 rules = []
-for rule in data["owasp_top20_rules"]:
-    patterns_list = [{"pattern-regex": p} for p in rule.get("patterns", [])]
+for rule in data.get("owasp_top20_rules", []):
+    patterns_list = [{"pattern-regex": p} for p in rule.get("patterns", []) if p.strip()]
+
+    if not patterns_list:
+        print(f"Warning: Rule {rule['id']} has no patterns. It will be ignored by Semgrep.")
 
     rules.append({
         "id": rule["id"],
@@ -28,6 +31,6 @@ for rule in data["owasp_top20_rules"]:
 semgrep_yml = {"rules": rules}
 
 with open(output_yml, "w") as f:
-    yaml.dump(semgrep_yml, f, sort_keys=False)
+    yaml.dump(semgrep_yml, f, sort_keys=False, default_flow_style=False, allow_unicode=True)
 
 print(f"Generated {len(rules)} Semgrep rules in {output_yml}")
