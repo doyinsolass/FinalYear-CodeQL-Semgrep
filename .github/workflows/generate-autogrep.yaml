@@ -19,7 +19,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install semgrep autogrep pyyaml
+        run: pip install semgrep pyyaml
 
       - name: Generate Autogrep rules
         run: autogrep --config autogrep_config.json
