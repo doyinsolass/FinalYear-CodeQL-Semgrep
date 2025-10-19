@@ -2,53 +2,40 @@ name: Semgrep Security Scan
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-
-permissions:
-  contents: read
-  security-events: write
 
 jobs:
   semgrep:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install Semgrep
+      - name: Install dependencies
         run: pip install semgrep pyyaml
 
       - name: Generate Semgrep rules YAML
         run: python generate_semgrep_yaml.py owasp_rules.json semgrep_rules.yml
 
-      - name: Run Semgrep scan
-        run: semgrep --config=semgrep_rules.yml --json --output=semgrep_output.json .
+      - name: Show generated YAML
+        run: cat semgrep_rules.yml
 
-      - name: Summarize Semgrep results
+      - name: Run Semgrep scan
+        run: semgrep --config=semgrep_rules.yml --json --output=semgrep_output.json . --verbose
+
+      - name: Summarize results
         run: |
           python - <<'EOF'
           import json, os
-          try:
-              with open("semgrep_output.json") as f:
-                  data = json.load(f)
-              count = len(data.get("results", []))
-              summary = f"## 🧠 Semgrep Security Summary\n\n✅ **{count} potential vulnerabilities found.**\n"
-              with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as s:
-                  s.write(summary)
-          except Exception as e:
-              print("Error reading Semgrep output:", e)
+          with open("semgrep_output.json") as f:
+              data = json.load(f)
+          count = len(data.get("results", []))
+          summary = f"## 🧠 Semgrep Security Summary\n\n✅ **{count} potential vulnerabilities found.**\n"
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as s:
+              s.write(summary)
           EOF
-
-      - name: Upload Semgrep JSON output
-        uses: actions/upload-artifact@v4
-        with:
-          name: semgrep-output
-          path: semgrep_output.json
