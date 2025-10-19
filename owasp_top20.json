@@ -1,0 +1,24 @@
+{
+  "owasp_top20_rules": [
+    {"id": "R001", "name": "SQL Injection", "cwe": "CWE-89", "description": "Untrusted input used to construct SQL queries.", "fix": "Use parameterized queries or prepared statements."},
+    {"id": "R002", "name": "Cross Site Scripting (XSS)", "cwe": "CWE-79", "description": "Improper handling of untrusted input allows injection of scripts.", "fix": "Use output encoding and validate all input."},
+    {"id": "R003", "name": "Information Leakage", "cwe": "CWE-209", "description": "Error messages reveal sensitive system info.", "fix": "Sanitize and handle exceptions securely."},
+    {"id": "R004", "name": "Frame Injection", "cwe": "CWE-451", "description": "Attackers inject frames to trick users.", "fix": "Use frame-busting code and validate URLs."},
+    {"id": "R005", "name": "Unvalidated URL Redirection", "cwe": "CWE-601", "description": "Improper validation of redirect URLs.", "fix": "Implement a whitelist of allowed domains."},
+    {"id": "R006", "name": "Missing Session Timeout", "cwe": "CWE-613", "description": "Lack of session timeout enables unauthorized access.", "fix": "Set proper session timeout limits."},
+    {"id": "R007", "name": "Sensitive Info in GET URL", "cwe": "CWE-598", "description": "Sensitive data exposed in URL parameters.", "fix": "Use POST for sensitive information."},
+    {"id": "R008", "name": "Session ID Cookies Not Secure", "cwe": "CWE-614", "description": "Session cookies transmitted over HTTP can be intercepted.", "fix": "Set secure flag on session cookies."},
+    {"id": "R009", "name": "Cross Frame Scripting (XFS)", "cwe": "CWE-611", "description": "Frames used to inject malicious scripts.", "fix": "Use proper validation and frame-busting techniques."},
+    {"id": "R010", "name": "Sensitive Info Displayed as Clear Text", "cwe": "CWE-312", "description": "Passwords or tokens displayed as plain text.", "fix": "Mask sensitive fields."},
+    {"id": "R011", "name": "Sensitive Info Cached", "cwe": "CWE-525", "description": "Browser caching exposes confidential data.", "fix": "Use no-cache headers."},
+    {"id": "R012", "name": "Inadequate Encryption Strength", "cwe": "CWE-326", "description": "Weak encryption algorithms can be brute-forced.", "fix": "Use strong encryption algorithms."},
+    {"id": "R013", "name": "CRLF Injection", "cwe": "CWE-93", "description": "User input in headers can inject newlines.", "fix": "Encode and validate user input."},
+    {"id": "R014", "name": "Trust Boundary Violation", "cwe": "CWE-501", "description": "Mixing untrusted input with trusted data.", "fix": "Always validate input."},
+    {"id": "R015", "name": "Directory Traversal", "cwe": "CWE-22", "description": "User input allows arbitrary file access.", "fix": "Restrict file access to safe directories."},
+    {"id": "R016", "name": "Session Fixation", "cwe": "CWE-384", "description": "Old session IDs reused after login.", "fix": "Invalidate old sessions and issue new ones."},
+    {"id": "R017", "name": "Risky Cryptographic Algorithm", "cwe": "CWE-327", "description": "Deprecated algorithms reduce data integrity.", "fix": "Use SHA-256 or stronger."},
+    {"id": "R018", "name": "Credentials Management", "cwe": "CWE-256", "description": "Passwords or secrets stored in plain text.", "fix": "Use secure password hashing."},
+    {"id": "R019", "name": "SQL Injection (Hibernate)", "cwe": "CWE-89", "description": "Dynamic SQL queries in ORM frameworks.", "fix": "Use parameterized queries in ORM."},
+    {"id": "R020", "name": "Improper Resource Shutdown", "cwe": "CWE-404", "description": "Resources not released properly, leading to memory leaks or DoS.", "fix": "Always close files and connections."}
+  ]
+}
