@@ -13,7 +13,7 @@ with open(input_json) as f:
     data = json.load(f)
 
 rules = []
-for rule in data["OWASP_top20_rules"]:
+for rule in data["owasp_top20_rules"]:
     pattern = rule["sample_code"]
     generalized_pattern = pattern.replace("$userInput", "...").replace("${userInput}", "...")
 
