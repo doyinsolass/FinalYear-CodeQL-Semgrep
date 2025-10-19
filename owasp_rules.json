@@ -6,7 +6,11 @@
       "cwe": "CWE-89",
       "description": "Untrusted input used in SQL queries can lead to data theft or corruption.",
       "fix": "Use parameterized queries or prepared statements.",
-      "pattern-regex": "(SELECT .* FROM .* WHERE .*['\"]\\$userInput['\"])|(execute\\(.*\\+.*\\))"
+      "patterns": [
+        "SELECT .* FROM .* WHERE .*['\"]\\$userInput['\"]",
+        "execute\\(.*\\+.*\\)",
+        "Statement\\.execute\\(.*\\)"
+      ]
     },
     {
       "id": "R002",
@@ -14,7 +18,11 @@
       "cwe": "CWE-79",
       "description": "Improper handling of untrusted input allows injection of malicious scripts.",
       "fix": "Use output encoding and validate all input.",
-      "pattern-regex": "(<script>.*</script>)|(.innerHTML = .*\\$userInput)"
+      "patterns": [
+        "<script>.*\\$userInput.*</script>",
+        "innerHTML = .*\\$userInput",
+        "document\\.write\\(.*\\$userInput.*\\)"
+      ]
     },
     {
       "id": "R003",
@@ -22,7 +30,11 @@
       "cwe": "CWE-209",
       "description": "Error messages reveal sensitive system or debug information.",
       "fix": "Sanitize and handle all exceptions securely.",
-      "pattern-regex": "(console\\.log\\(.*error.*\\))|(print\\(e\\))"
+      "patterns": [
+        "print\\(e\\)",
+        "console\\.error\\(.*\\)",
+        "System\\.out\\.println\\(.*Exception.*\\)"
+      ]
     },
     {
       "id": "R004",
@@ -30,7 +42,10 @@
       "cwe": "CWE-451",
       "description": "Attackers inject frames to trick users and capture data.",
       "fix": "Use frame-busting code and validate URLs.",
-      "pattern-regex": "(<iframe src=.*>)|(window\\.location = '.*')"
+      "patterns": [
+        "<iframe src=.*>",
+        "document\\.createElement\\('iframe'\\)"
+      ]
     },
     {
       "id": "R005",
@@ -38,7 +53,10 @@
       "cwe": "CWE-601",
       "description": "Improper validation of redirect URLs allows phishing redirects.",
       "fix": "Implement a whitelist of allowed domains.",
-      "pattern-regex": "(response\\.redirect\\(request\\.GET\\['next'\\]\\))|(window\\.location = .*)"
+      "patterns": [
+        "response\\.redirect\\(request\\.GET\\[.*\\]\\)",
+        "window\\.location\\.href = .*"
+      ]
     },
     {
       "id": "R006",
@@ -46,7 +64,10 @@
       "cwe": "CWE-613",
       "description": "Lack of session timeout enables unauthorized access after inactivity.",
       "fix": "Set appropriate session timeout limits.",
-      "pattern-regex": "(session\\.setTimeout\\(0\\))|(<session-timeout>0</session-timeout>)"
+      "patterns": [
+        "<session-timeout>0</session-timeout>",
+        "session\\.setMaxInactiveInterval\\(0\\)"
+      ]
     },
     {
       "id": "R007",
@@ -54,7 +75,10 @@
       "cwe": "CWE-598",
       "description": "Sensitive data exposed in URL query parameters.",
       "fix": "Use POST instead of GET for sensitive information.",
-      "pattern-regex": "(GET .*password=.*)|(\\?token=.*)"
+      "patterns": [
+        "GET .*\\?password=.*",
+        "location\\.search=.*password=.*"
+      ]
     },
     {
       "id": "R008",
@@ -62,7 +86,10 @@
       "cwe": "CWE-614",
       "description": "Session cookies transmitted over HTTP can be intercepted.",
       "fix": "Set secure flag on session cookies.",
-      "pattern-regex": "(Set-Cookie: .*; HttpOnly?;?)"
+      "patterns": [
+        "Set-Cookie: .*; HttpOnly",
+        "document\\.cookie = .*"
+      ]
     },
     {
       "id": "R009",
@@ -70,7 +97,10 @@
       "cwe": "CWE-611",
       "description": "Attackers exploit frames to inject malicious scripts.",
       "fix": "Use proper validation and frame-busting techniques.",
-      "pattern-regex": "(<iframe src=.*>)|(.contentWindow)"
+      "patterns": [
+        "<iframe src=.*>",
+        "window\\.frameElement"
+      ]
     },
     {
       "id": "R010",
@@ -78,7 +108,10 @@
       "cwe": "CWE-312",
       "description": "Sensitive data like passwords or tokens are displayed as plain text.",
       "fix": "Mask sensitive fields using password input types.",
-      "pattern-regex": "(<input type=['\"]text['\"] value=['\"].*password.*['\"]>)"
+      "patterns": [
+        "<input type='text' value='.*password.*'>",
+        "console\\.log\\('password.*'\\)"
+      ]
     },
     {
       "id": "R011",
@@ -86,7 +119,10 @@
       "cwe": "CWE-525",
       "description": "Browser caching exposes confidential data.",
       "fix": "Use no-cache HTTP headers.",
-      "pattern-regex": "(<meta http-equiv=['\"]Cache-Control['\"] content=['\"]public['\"]>)|(Cache-Control: public)"
+      "patterns": [
+        "<meta http-equiv='Cache-Control' content='public'>",
+        "response\\.setHeader\\('Cache-Control', 'public'\\)"
+      ]
     },
     {
       "id": "R012",
@@ -94,7 +130,11 @@
       "cwe": "CWE-326",
       "description": "Weak or outdated encryption algorithms can be brute-forced.",
       "fix": "Use strong encryption algorithms (AES-256, RSA-2048+).",
-      "pattern-regex": "(DES\\.new\\()|(MD5\\.new\\()|(SHA1\\.new\\()"
+      "patterns": [
+        "DES\\.new\\(",
+        "MD5\\.hash\\(",
+        "Crypto\\.createCipher\\('des'"
+      ]
     },
     {
       "id": "R013",
@@ -102,7 +142,10 @@
       "cwe": "CWE-93",
       "description": "User input in headers or logs can inject newlines.",
       "fix": "URL-encode user input and validate newlines.",
-      "pattern-regex": "(header = 'Location: ' \\+ .*)"
+      "patterns": [
+        "header = 'Location: ' \\+ user_input",
+        "logger\\.info\\(.*\\n.*\\)"
+      ]
     },
     {
       "id": "R014",
@@ -110,7 +153,10 @@
       "cwe": "CWE-501",
       "description": "Untrusted input is mixed with trusted system data.",
       "fix": "Always validate input before trusting or storing.",
-      "pattern-regex": "(config\\['admin'\\] = request\\.GET\\['admin'\\])"
+      "patterns": [
+        "config\\[.*\\] = request\\.GET\\[.*\\]",
+        "System\\.setProperty\\(.*userInput.*\\)"
+      ]
     },
     {
       "id": "R015",
@@ -118,7 +164,10 @@
       "cwe": "CWE-22",
       "description": "User input allows access to arbitrary files on server.",
       "fix": "Restrict file access to safe directories only.",
-      "pattern-regex": "(open\\(['\"]\\.\\./\\.\\./.*['\"]\\))|(readFileSync\\('\\.\\./\\.\\./.*'\\))"
+      "patterns": [
+        "open\\('\\.\\./\\.\\./.*'\\)",
+        "FileInputStream\\(new File\\(.*\\.\\.\\/\\.\\.\\/.*\\)\\)"
+      ]
     },
     {
       "id": "R016",
@@ -126,7 +175,10 @@
       "cwe": "CWE-384",
       "description": "Old session IDs are reused after login, enabling hijacking.",
       "fix": "Invalidate old sessions and issue new ones after login.",
-      "pattern-regex": "(session\\['user'\\] = .*)"
+      "patterns": [
+        "session\\['user'\\] = .*",
+        "request\\.getSession\\(false\\)"
+      ]
     },
     {
       "id": "R017",
@@ -134,7 +186,10 @@
       "cwe": "CWE-327",
       "description": "Deprecated algorithms like MD5 or SHA1 reduce data integrity.",
       "fix": "Use SHA-256 or better for hashing.",
-      "pattern-regex": "(hashlib\\.md5\\(.*\\))|(MessageDigest\\.getInstance\\('MD5'\\))"
+      "patterns": [
+        "hashlib\\.md5\\(",
+        "MessageDigest\\.getInstance\\('SHA-1'\\)"
+      ]
     },
     {
       "id": "R018",
@@ -142,7 +197,10 @@
       "cwe": "CWE-256",
       "description": "Passwords or secrets stored in plain text.",
       "fix": "Use secure password hashing (bcrypt, Argon2).",
-      "pattern-regex": "(password *= *['\"].*['\"])|(const SECRET = '.*')"
+      "patterns": [
+        "password\\s*=\\s*['\"].*['\"]",
+        "apiKey\\s*=\\s*['\"].*['\"]"
+      ]
     },
     {
       "id": "R019",
@@ -150,7 +208,10 @@
       "cwe": "CWE-89",
       "description": "Dynamic SQL queries in ORM frameworks can be exploited.",
       "fix": "Use parameterized queries in ORM APIs.",
-      "pattern-regex": "(session\\.createQuery\\('from .* where .*=' \\+ .*)"
+      "patterns": [
+        "session\\.createQuery\\('from .* where .*='\\+.*\\)",
+        "entityManager\\.createQuery\\(.*\\+.*\\)"
+      ]
     },
     {
       "id": "R020",
@@ -158,7 +219,11 @@
       "cwe": "CWE-404",
       "description": "Resources not released properly, leading to memory leaks or DoS.",
       "fix": "Always close files, connections, and streams.",
-      "pattern-regex": "(conn\\.open\\(\\))|(file\\.open\\(\\))|(connection\\.close\\(\\))"
+      "patterns": [
+        "conn\\.open\\(",
+        "FileInputStream\\(.*\\)\\.close\\(",
+        "Socket\\(.*\\)"
+      ]
     }
   ]
 }
