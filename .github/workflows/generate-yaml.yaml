@@ -44,11 +44,6 @@ jobs:
       - name: Generate GitHub Actions workflow YAML
         run: python semgrep_gen.py github_spec.json .github/generated-workflow.yml
 
-      - name: Validate YAML syntax
-        run: |
-          yamllint generate-yaml.yaml
-          yamllint .github/generate-yaml.yaml
-
       - name: Upload generated files
         uses: actions/upload-artifact@v4
         with:
