@@ -1,34 +1,34 @@
 import json
-import os
+import sys
 import yaml
 
-def generate_semgrep_rules(json_file, output_dir):
-    with open(json_file, 'r') as f:
-        data = json.load(f)
-    os.makedirs(output_dir, exist_ok=True)
-    for rule in data['owasp_top20_rules']:
-        rule_yml = {
-            'rules': [
-                {
-                    'id': f"owasp.{rule['id']}",
-                    'patterns': [
-                        {'pattern': rule.get('sample_code', '')}
-                    ],
-                    'message': f"{rule['name']} - {rule['description']}",
-                    'metadata': {
-                        'cwe': rule['cwe'],
-                        'owasp': 'Top 20',
-                        'remediation': rule['fix']
-                    },
-                    'severity': 'WARNING',
-                    'languages': ['python', 'java', 'javascript', 'html']
-                }
-            ]
-        }
-        yml_path = os.path.join(output_dir, f"{rule['id'].lower()}.yml")
-        with open(yml_path, 'w') as out:
-            yaml.dump(rule_yml, out, sort_keys=False)
-    print(f"Generated {len(data['owasp_top20_rules'])} Semgrep rules in {output_dir}")
+if len(sys.argv) != 3:
+    print("Usage: python semgrep_gen.py <rules.json> <output.yml>")
+    sys.exit(1)
 
-if __name__ == "__main__":
-    generate_semgrep_rules('owasp_rules.json', 'semgrep_rules')
+input_json = sys.argv[1]
+output_yml = sys.argv[2]
+
+with open(input_json) as f:
+    data = json.load(f)
+
+rules = []
+for rule in data["OWASP_top20_rules"]:
+    pattern = rule["sample_code"]
+    generalized_pattern = pattern.replace("$userInput", "...").replace("${userInput}", "...")
+
+    rules.append({
+        "id": rule["id"],
+        "patterns": [{"pattern-regex": generalized_pattern}],
+        "message": f"{rule['name']} detected. {rule['description']} Fix: {rule['fix']}",
+        "languages": ["python", "java", "javascript", "html"],
+        "severity": "ERROR",
+        "metadata": {"cwe": rule["cwe"]}
+    })
+
+semgrep_yml = {"rules": rules}
+
+with open(output_yml, "w") as f:
+    yaml.dump(semgrep_yml, f, sort_keys=False)
+
+print(f"Generated {len(rules)} Semgrep rules in {output_yml}")
