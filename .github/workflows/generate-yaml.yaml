@@ -23,7 +23,7 @@ jobs:
 
       - name: Generate Semgrep rules from the json
         run: |
-          python semgrep_gen.py rules.json semgrep-rules.yml
+          python semgrep_gen.py owasp_rules.json semgrep-rules.yml
           echo "Running Semgrep scan..."
           semgrep --json --config semgrep-rules.yml . > semgrep_output.json || true
           echo "Summarizing results..."
