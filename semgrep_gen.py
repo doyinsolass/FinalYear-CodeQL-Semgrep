@@ -3,7 +3,7 @@ import sys
 import yaml
 
 if len(sys.argv) != 3:
-    print("Usage: python semgrep_gen.py <rules.json> <output.yml>")
+    print("Usage: python semgrep_gen.py <owasp_rules.json> <output.yml>")
     sys.exit(1)
 
 input_json = sys.argv[1]
