@@ -1,12 +1,13 @@
-name: Autogrep & Semgrep Scan
+name: Generated Rule Scan
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
 
 jobs:
-  autogrep-scan:
+  semgrep:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,14 +22,11 @@ jobs:
       - name: Install dependencies
         run: pip install semgrep pyyaml
 
-      - name: Download Autogrep script
-        run: curl -o autogrep.py https://raw.githubusercontent.com/returntocorp/autogrep/main/autogrep.py
-
-      - name: Generate Autogrep rules
-        run: python autogrep.py --config autogrep_config.json --output autogrep_rules.yml
+      - name: Generate Semgrep rules YAML
+        run: python generate_semgrep_yaml.py owasp_rules.json semgrep_rules.yml
 
       - name: Run Semgrep scan
-        run: semgrep --json --config autogrep_rules.yml . > semgrep_output.json || true
+        run: semgrep --config=semgrep_rules.yml --json --output=semgrep_output.json || true
 
       - name: Summarize Semgrep results
         run: |
@@ -38,17 +36,18 @@ jobs:
               with open("semgrep_output.json") as f:
                   data = json.load(f)
               count = len(data.get("results", []))
-              summary = f"## 🧠 Autogrep Security Summary\n\n✅ **{count} potential issues found.**\n"
+              summary = f"## 🧠 Semgrep Security Summary\n\n✅ **{count} potential vulnerabilities found.**\n"
+              print(summary)
               with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as s:
                   s.write(summary)
           except Exception as e:
               print("Error reading Semgrep output:", e)
           EOF
 
-      - name: Upload generated rules and output
+      - name: Upload Semgrep output
         uses: actions/upload-artifact@v4
         with:
-          name: autogrep-artifacts
+          name: semgrep-artifacts
           path: |
-            autogrep_rules.yml
+            semgrep_rules.yml
             semgrep_output.json
