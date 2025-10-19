@@ -14,9 +14,7 @@ with open(input_json) as f:
 
 rules = []
 for rule in data["owasp_top20_rules"]:
-    patterns_list = []
-    for pattern in rule.get("patterns", []):
-        patterns_list.append({"pattern-regex": pattern})
+    patterns_list = [{"pattern-regex": p} for p in rule.get("patterns", [])]
 
     rules.append({
         "id": rule["id"],
@@ -27,9 +25,9 @@ for rule in data["owasp_top20_rules"]:
         "metadata": {"cwe": rule["cwe"]}
     })
 
-semgrep_yaml = {"rules": rules}
+semgrep_yml = {"rules": rules}
 
 with open(output_yml, "w") as f:
-    yaml.dump(semgrep_yaml, f, sort_keys=False)
+    yaml.dump(semgrep_yml, f, sort_keys=False)
 
 print(f"Generated {len(rules)} Semgrep rules in {output_yml}")
