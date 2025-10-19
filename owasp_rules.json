@@ -5,140 +5,225 @@
       "name": "SQL Injection",
       "cwe": "CWE-89",
       "description": "Untrusted input used to construct SQL queries can lead to data theft or corruption.",
-      "fix": "Use parameterized queries or prepared statements."
+      "fix": "Use parameterized queries or prepared statements.",
+      "patterns": [
+        ".*SELECT .* FROM .* WHERE .*['\"].*['\"].*",
+        ".*createQuery\\(.*\\+.*\\).*"
+      ]
     },
     {
       "id": "R002",
       "name": "Cross Site Scripting (XSS)",
       "cwe": "CWE-79",
       "description": "Improper handling of untrusted input allows injection of malicious scripts.",
-      "fix": "Use output encoding and validate all input."
+      "fix": "Use output encoding and validate all input.",
+      "patterns": [
+        ".*<script>.*</script>.*",
+        ".*innerHTML\\s*=.*",
+        ".*document\\.write\\(.*\\).*"
+      ]
     },
     {
       "id": "R003",
       "name": "Information Leakage",
       "cwe": "CWE-209",
       "description": "Error messages reveal sensitive system or debug information.",
-      "fix": "Sanitize and handle all exceptions securely."
+      "fix": "Sanitize and handle all exceptions securely.",
+      "patterns": [
+        ".*print\\(.*Exception.*\\).*",
+        ".*console\\.log\\(.*error.*\\).*",
+        ".*traceback\\.print_exc\\(.*\\).*"
+      ]
     },
     {
       "id": "R004",
-      "name": "Frame Injection",
-      "cwe": "CWE-451",
-      "description": "Attackers inject frames to trick users and capture data.",
-      "fix": "Use frame-busting code and validate URLs."
+      "name": "Hardcoded Credentials",
+      "cwe": "CWE-798",
+      "description": "Storing passwords or API keys directly in code.",
+      "fix": "Use environment variables or secrets manager.",
+      "patterns": [
+        ".*password\\s*=\\s*['\"].*['\"]",
+        ".*api_key\\s*=\\s*['\"].*['\"]",
+        ".*aws_secret_access_key\\s*=\\s*['\"].*['\"]"
+      ]
     },
     {
       "id": "R005",
-      "name": "Unvalidated URL Redirection",
-      "cwe": "CWE-601",
-      "description": "Improper validation of redirect URLs allows phishing redirects.",
-      "fix": "Implement a whitelist of allowed domains."
+      "name": "Insecure Deserialization",
+      "cwe": "CWE-502",
+      "description": "Deserializing untrusted data can lead to remote code execution.",
+      "fix": "Validate or avoid deserialization of untrusted data.",
+      "patterns": [
+        ".*pickle\\.load\\(.*\\).*",
+        ".*ObjectInputStream.*readObject\\(.*\\).*"
+      ]
     },
     {
       "id": "R006",
-      "name": "Missing Session Timeout",
-      "cwe": "CWE-613",
-      "description": "Lack of session timeout enables unauthorized access after inactivity.",
-      "fix": "Set appropriate session timeout limits."
+      "name": "Command Injection",
+      "cwe": "CWE-77",
+      "description": "Unsanitized input used in system commands can be exploited.",
+      "fix": "Use parameterized APIs or sanitize input.",
+      "patterns": [
+        ".*os\\.system\\(.*\\+.*\\).*",
+        ".*Runtime\\.getRuntime\\(\\)\\.exec\\(.*\\+.*\\).*",
+        ".*subprocess\\.Popen\\(.*\\+.*\\).*"
+      ]
     },
     {
       "id": "R007",
-      "name": "Sensitive Info in GET URL",
-      "cwe": "CWE-598",
-      "description": "Sensitive data exposed in URL query parameters.",
-      "fix": "Use POST instead of GET for sensitive information."
+      "name": "Directory Traversal",
+      "cwe": "CWE-22",
+      "description": "User input allows access to arbitrary files on the server.",
+      "fix": "Restrict file access to safe directories only.",
+      "patterns": [
+        ".*open\\(.*\\.\\./.*\\).*",
+        ".*File\\(.*\\.\\./.*\\).*",
+        ".*new File\\(.*\\.\\./.*\\).*"
+      ]
     },
     {
       "id": "R008",
-      "name": "Session ID Cookies Not Secure",
-      "cwe": "CWE-614",
-      "description": "Session cookies transmitted over HTTP can be intercepted.",
-      "fix": "Set secure flag on session cookies."
+      "name": "Cross-Site Request Forgery (CSRF)",
+      "cwe": "CWE-352",
+      "description": "Missing anti-CSRF tokens allow attackers to forge requests.",
+      "fix": "Implement CSRF protection.",
+      "patterns": [
+        ".*csrf_token\\s*==\\s*None.*",
+        ".*forms\\.csrf\\s*not required.*"
+      ]
     },
     {
       "id": "R009",
-      "name": "Cross Frame Scripting (XFS)",
-      "cwe": "CWE-611",
-      "description": "Attackers exploit frames to inject malicious scripts.",
-      "fix": "Use proper validation and frame-busting techniques."
+      "name": "Insecure HTTP Usage",
+      "cwe": "CWE-319",
+      "description": "Transmitting sensitive data over HTTP.",
+      "fix": "Use HTTPS instead of HTTP for secure data transmission.",
+      "patterns": [
+        ".*http://.*",
+        ".*fetch\\(\"http://.*\".*\\).*"
+      ]
     },
     {
       "id": "R010",
-      "name": "Sensitive Info Displayed as Clear Text",
-      "cwe": "CWE-312",
-      "description": "Sensitive data like passwords or tokens are displayed as plain text.",
-      "fix": "Mask sensitive fields using password input types."
+      "name": "Unsafe Regex",
+      "cwe": "CWE-1333",
+      "description": "User input in regex can cause ReDoS attacks.",
+      "fix": "Validate input or use safe regex patterns.",
+      "patterns": [
+        ".*re\\.compile\\(user_input.*\\).*",
+        ".*new RegExp\\(user_input.*\\).*"
+      ]
     },
     {
       "id": "R011",
-      "name": "Sensitive Info Cached",
-      "cwe": "CWE-525",
-      "description": "Browser caching exposes confidential data.",
-      "fix": "Use no-cache HTTP headers."
+      "name": "Sensitive Info in Logs",
+      "cwe": "CWE-532",
+      "description": "Logging passwords, secrets, or sensitive data.",
+      "fix": "Avoid logging secrets.",
+      "patterns": [
+        ".*logger\\.info\\(.*password.*\\).*",
+        ".*console\\.log\\(.*token.*\\).*"
+      ]
     },
     {
       "id": "R012",
-      "name": "Inadequate Encryption Strength",
-      "cwe": "CWE-326",
-      "description": "Weak or outdated encryption algorithms can be brute-forced.",
-      "fix": "Use strong encryption algorithms (AES-256, RSA-2048+)."
+      "name": "Session Management Flaws",
+      "cwe": "CWE-384",
+      "description": "Weak session management or session fixation.",
+      "fix": "Regenerate session IDs after login.",
+      "patterns": [
+        ".*session\\['user'\\]\\s*=.*",
+        ".*request\\.session\\s*\\.id\\s*=.*"
+      ]
     },
     {
       "id": "R013",
-      "name": "CRLF Injection",
-      "cwe": "CWE-93",
-      "description": "User input in headers or logs can inject newlines.",
-      "fix": "URL-encode user input and validate newlines."
+      "name": "Sensitive Data Exposure",
+      "cwe": "CWE-312",
+      "description": "Sensitive data displayed as plaintext.",
+      "fix": "Encrypt or mask sensitive data.",
+      "patterns": [
+        ".*<input type=['\"]text['\"] value=['\"].*['\"]>.*",
+        ".*console\\.log\\(.*password.*\\).*"
+      ]
     },
     {
       "id": "R014",
-      "name": "Trust Boundary Violation",
-      "cwe": "CWE-501",
-      "description": "Untrusted input is mixed with trusted system data.",
-      "fix": "Always validate input before trusting or storing."
+      "name": "XML External Entity (XXE)",
+      "cwe": "CWE-611",
+      "description": "Parsing XML from untrusted sources can lead to XXE attacks.",
+      "fix": "Disable external entity processing.",
+      "patterns": [
+        ".*DocumentBuilderFactory\\.newInstance\\(\\).*",
+        ".*xml\\.parse\\(.*\\).*"
+      ]
     },
     {
       "id": "R015",
-      "name": "Directory Traversal",
-      "cwe": "CWE-22",
-      "description": "User input allows access to arbitrary files on server.",
-      "fix": "Restrict file access to safe directories only."
+      "name": "Broken Access Control",
+      "cwe": "CWE-284",
+      "description": "Improperly enforced authorization allows privilege escalation.",
+      "fix": "Validate permissions on every request.",
+      "patterns": [
+        ".*if user\\.is_admin.*",
+        ".*if role == 'admin'.*"
+      ]
     },
     {
       "id": "R016",
-      "name": "Session Fixation",
-      "cwe": "CWE-384",
-      "description": "Old session IDs are reused after login, enabling hijacking.",
-      "fix": "Invalidate old sessions and issue new ones after login."
+      "name": "Insecure Cryptography",
+      "cwe": "CWE-327",
+      "description": "Use of weak or deprecated cryptographic algorithms.",
+      "fix": "Use AES-256, RSA-2048+, or modern hashing like SHA-256.",
+      "patterns": [
+        ".*hashlib\\.md5\\(.*\\).*",
+        ".*Cipher\\.getInstance\\('DES'.*\\).*"
+      ]
     },
     {
       "id": "R017",
-      "name": "Risky Cryptographic Algorithm",
-      "cwe": "CWE-327",
-      "description": "Deprecated algorithms like MD5 or SHA1 reduce data integrity.",
-      "fix": "Use SHA-256 or better for hashing."
+      "name": "Clickjacking / UI Redress",
+      "cwe": "CWE-1021",
+      "description": "Pages can be embedded in frames, leading to clickjacking attacks.",
+      "fix": "Use X-Frame-Options or frame busting scripts.",
+      "patterns": [
+        ".*<iframe src=.*>.*",
+        ".*X-Frame-Options.*"
+      ]
     },
     {
       "id": "R018",
-      "name": "Credentials Management",
-      "cwe": "CWE-256",
-      "description": "Passwords or secrets stored in plain text.",
-      "fix": "Use secure password hashing (bcrypt, Argon2)."
+      "name": "Insecure File Upload",
+      "cwe": "CWE-434",
+      "description": "Unrestricted file upload can lead to remote code execution.",
+      "fix": "Validate file type and restrict execution.",
+      "patterns": [
+        ".*request\\.files\\[.*\\].*save.*",
+        ".*FileUpload\\(.*\\).*"
+      ]
     },
     {
       "id": "R019",
-      "name": "SQL Injection (Hibernate)",
-      "cwe": "CWE-89",
-      "description": "Dynamic SQL queries in ORM frameworks can be exploited.",
-      "fix": "Use parameterized queries in ORM APIs."
+      "name": "Server-Side Request Forgery (SSRF)",
+      "cwe": "CWE-918",
+      "description": "Server requests untrusted URLs leading to internal access.",
+      "fix": "Validate URLs before making requests.",
+      "patterns": [
+        ".*requests\\.get\\(user_input.*\\).*",
+        ".*httpClient\\.execute\\(.*\\).*"
+      ]
     },
     {
       "id": "R020",
-      "name": "Improper Resource Shutdown",
+      "name": "Improper Resource Management",
       "cwe": "CWE-404",
       "description": "Resources not released properly, leading to memory leaks or DoS.",
-      "fix": "Always close files, connections, and streams."
+      "fix": "Always close files, connections, and streams.",
+      "patterns": [
+        ".*conn\\.open\\(.*\\).*",
+        ".*file\\.open\\(.*\\).*"
+      ]
     }
   ]
 }
