@@ -21,11 +21,11 @@ jobs:
       - name: Install dependencies
         run: pip install semgrep pyyaml
 
-      - name: Clone Autogrep
-        run: git clone https://github.com/returntocorp/autogrep.git autogrep
+      - name: Download Autogrep script
+        run: curl -o autogrep.py https://raw.githubusercontent.com/returntocorp/autogrep/main/autogrep.py
 
       - name: Generate Autogrep rules
-        run: python autogrep/autogrep.py --config autogrep_config.json
+        run: python autogrep.py --config autogrep_config.json --output autogrep_rules.yml
 
       - name: Run Semgrep scan
         run: semgrep --json --config autogrep_rules.yml . > semgrep_output.json || true
@@ -39,7 +39,6 @@ jobs:
                   data = json.load(f)
               count = len(data.get("results", []))
               summary = f"## 🧠 Autogrep Security Summary\n\n✅ **{count} potential issues found.**\n"
-              print(summary)
               with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as s:
                   s.write(summary)
           except Exception as e:
