@@ -46,8 +46,8 @@ jobs:
 
       - name: Validate YAML syntax
         run: |
-          yamllint semgrep-rules.yml
-          yamllint .github/generated-workflow.yml
+          yamllint generate-yaml.yaml
+          yamllint .github/generate-yaml.yaml
 
       - name: Upload generated files
         uses: actions/upload-artifact@v4
