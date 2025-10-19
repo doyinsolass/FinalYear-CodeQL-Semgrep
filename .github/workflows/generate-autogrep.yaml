@@ -1,0 +1,51 @@
+name: Autogrep & Semgrep Scan
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  autogrep-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install semgrep autogrep pyyaml
+
+      - name: Generate Autogrep rules
+        run: autogrep --config autogrep_config.json
+
+      - name: Run Semgrep scan
+        run: semgrep --json --config autogrep_rules.yml . > semgrep_output.json || true
+
+      - name: Summarize Semgrep results
+        run: |
+          python - <<'EOF'
+          import json, os
+          try:
+              with open("semgrep_output.json") as f:
+                  data = json.load(f)
+              count = len(data.get("results", []))
+              summary = f"## 🧠 Autogrep Security Summary\n\n✅ **{count} potential issues found.**\n"
+              with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as s:
+                  s.write(summary)
+          except Exception as e:
+              print("Error reading Semgrep output:", e)
+          EOF
+
+      - name: Upload generated rules and output
+        uses: actions/upload-artifact@v4
+        with:
+          name: autogrep-artifacts
+          path: |
+            autogrep_rules.yml
+            semgrep_output.json
