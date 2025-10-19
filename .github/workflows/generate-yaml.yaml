@@ -10,55 +10,55 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-    - name: Install dependencies
-      run: pip install pyyaml semgrep yamllint
+      - name: Install dependencies
+        run: pip install pyyaml semgrep yamllint
 
-    - name: Generate Semgrep rules
-      run: |
-        python semgrep_gen.py rules.json semgrep-rules.yml
-        echo "Running Semgrep scan..."
-        semgrep --json --config semgrep-rules.yml . > semgrep_output.json || true
-        echo "Summarizing results..."
-        python - <<'EOF'
-import json, os
-try:
-    with open("semgrep_output.json") as f:
-        data = json.load(f)
-    count = len(data.get("results", []))
-    summary = f"## 🧠 Semgrep Security Summary\n\n✅ **{count} potential vulnerabilities found.**\n\n"
-    print(summary)
-    with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary_file:
-        summary_file.write(summary)
-except Exception as e:
-    print("Error reading Semgrep output:", e)
-EOF
+      - name: Generate Semgrep rules
+        run: |
+          python semgrep_gen.py rules.json semgrep-rules.yml
+          echo "Running Semgrep scan..."
+          semgrep --json --config semgrep-rules.yml . > semgrep_output.json || true
+          echo "Summarizing results..."
+          python - <<'EOF'
+          import json, os
+          try:
+              with open("semgrep_output.json") as f:
+                  data = json.load(f)
+              count = len(data.get("results", []))
+              summary = f"## 🧠 Semgrep Security Summary\n\n✅ **{count} potential vulnerabilities found.**\n\n"
+              print(summary)
+              with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary_file:
+                  summary_file.write(summary)
+          except Exception as e:
+              print("Error reading Semgrep output:", e)
+          EOF
 
-    - name: Generate GitLab CI YAML
-      run: python gitlab_gen.py gitlab_spec.json .gitlab-ci.yml
+      - name: Generate GitLab CI YAML
+        run: python gitlab_gen.py gitlab_spec.json .gitlab-ci.yml
 
-    - name: Generate Kubernetes manifest
-      run: python k8s_gen.py > secure-pod.yml
+      - name: Generate Kubernetes manifest
+        run: python k8s_gen.py > secure-pod.yml
 
-    - name: Validate YAML syntax
-      run: |
-        yamllint semgrep-rules.yml
-        yamllint .gitlab-ci.yml
-        yamllint secure-pod.yml
+      - name: Validate YAML syntax
+        run: |
+          yamllint semgrep-rules.yml
+          yamllint .gitlab-ci.yml
+          yamllint secure-pod.yml
 
-    - name: Upload generated files
-      uses: actions/upload-artifact@v4
-      with:
-        name: generated-yamls
-        path: |
-          semgrep-rules.yml
-          .gitlab-ci.yml
-          secure-pod.yml
-          semgrep_output.json
+      - name: Upload generated files
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-yamls
+          path: |
+            semgrep-rules.yml
+            .gitlab-ci.yml
+            secure-pod.yml
+            semgrep_output.json
