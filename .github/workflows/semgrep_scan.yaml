@@ -1,4 +1,4 @@
-name: Generated Rule Scan
+name: Semgrep Security Scan
 
 on:
   push:
@@ -6,12 +6,16 @@ on:
       - main
   pull_request:
 
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
   semgrep:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -19,14 +23,14 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Install Semgrep
         run: pip install semgrep pyyaml
 
       - name: Generate Semgrep rules YAML
         run: python generate_semgrep_yaml.py owasp_rules.json semgrep_rules.yml
 
       - name: Run Semgrep scan
-        run: semgrep --config=semgrep_rules.yml --json --output=semgrep_output.json || true
+        run: semgrep --config=semgrep_rules.yml --json --output=semgrep_output.json .
 
       - name: Summarize Semgrep results
         run: |
@@ -37,17 +41,14 @@ jobs:
                   data = json.load(f)
               count = len(data.get("results", []))
               summary = f"## 🧠 Semgrep Security Summary\n\n✅ **{count} potential vulnerabilities found.**\n"
-              print(summary)
               with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as s:
                   s.write(summary)
           except Exception as e:
               print("Error reading Semgrep output:", e)
           EOF
 
-      - name: Upload Semgrep output
+      - name: Upload Semgrep JSON output
         uses: actions/upload-artifact@v4
         with:
-          name: semgrep-artifacts
-          path: |
-            semgrep_rules.yml
-            semgrep_output.json
+          name: semgrep-output
+          path: semgrep_output.json
