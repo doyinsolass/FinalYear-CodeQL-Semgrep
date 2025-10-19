@@ -42,7 +42,7 @@ jobs:
           EOF
 
       - name: Generate GitHub Actions workflow YAML
-        run: python semgrep_gen.py github_spec.json .github/generated-workflow.yml
+        run: python semgrep_gen.py owasp_rules.json .github/generated-workflow.yml
 
       - name: Upload generated files
         uses: actions/upload-artifact@v4
