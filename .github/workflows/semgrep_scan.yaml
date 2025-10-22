@@ -1,41 +1,33 @@
-name: Semgrep Security Scan
+name: Semgrep OWASP Scan
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
+  workflow_dispatch:
+    inputs:
+      rule_count:
+        description: 'Number of OWASP rules to include'
+        required: true
+        default: '5'
 
 jobs:
   semgrep:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.x'
 
-      - name: Install dependencies
-        run: pip install semgrep pyyaml
+      - name: Install Semgrep
+        run: pip install semgrep
 
-      - name: Generate Semgrep rules YAML
-        run: python generate_semgrep_yaml.py owasp_rules.json semgrep_rules.yml
-
-      - name: Show generated YAML
-        run: cat semgrep_rules.yml
-
-      - name: Run Semgrep scan
-        run: semgrep --config=semgrep_rules.yml --json --output=semgrep_output.json . --verbose
-
-      - name: Summarize results
+      - name: Generate Semgrep YAML
         run: |
-          python - <<'EOF'
-          import json, os
-          with open("semgrep_output.json") as f:
-              data = json.load(f)
-          count = len(data.get("results", []))
-          summary = f"## 🧠 Semgrep Security Summary\n\n✅ **{count} potential vulnerabilities found.**\n"
-          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as s:
-              s.write(summary)
-          EOF
+          export RULE_COUNT=${{ github.event.inputs.rule_count }}
+          python generate_yaml.py
+
+      - name: Run Semgrep
+        run: semgrep --config semgrep_scan.yaml --error
