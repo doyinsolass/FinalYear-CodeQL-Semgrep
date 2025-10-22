@@ -12,13 +12,14 @@ def select_rules(rules, count):
 def generate_yaml(selected_rules, output_path='semgrep_scan.yaml'):
     yaml_structure = {'rules': []}
     for rule in selected_rules:
-        yaml_structure['rules'].append({
+        yaml_rule = {
             'id': rule['id'],
-            'patterns': rule['patterns'],
             'message': rule['description'],
             'severity': 'ERROR',
-            'languages': ['python', 'javascript', 'java']  # Adjust as needed
-        })
+            'languages': ['python', 'javascript', 'java'],
+            'patterns': [{'pattern': p} for p in rule['patterns']]
+        }
+        yaml_structure['rules'].append(yaml_rule)
     with open(output_path, 'w') as f:
         yaml.dump(yaml_structure, f, sort_keys=False)
 
