@@ -21,8 +21,8 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install Semgrep
-        run: pip install semgrep
+      - name: Install dependencies
+        run: pip install semgrep pyyaml
 
       - name: Generate Semgrep YAML
         run: |
@@ -31,3 +31,4 @@ jobs:
 
       - name: Run Semgrep
         run: semgrep --config semgrep_scan.yaml --error
+
