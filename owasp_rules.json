@@ -1,164 +1,207 @@
-rules:
-  - id: R001
-    message: "Possible SQL injection via string concatenation in query execution."
-    severity: ERROR
-    languages: [java, python]
-    pattern-either:
-      - pattern: $DB.execute($QUERY + $USER_INPUT)
-      - pattern: $DB.prepareStatement($QUERY + $USER_INPUT)
-
-  - id: R002
-    message: "Assignment to innerHTML or use of document.write can lead to XSS vulnerabilities."
-    severity: ERROR
-    languages: [javascript]
-    pattern-either:
-      - pattern: $OBJ.innerHTML = $VAL
-      - pattern: document.write($VAL)
-
-  - id: R003
-    message: "Sensitive exception info may be leaked via logging or printing."
-    severity: WARNING
-    languages: [python, java, javascript]
-    pattern-either:
-      - pattern: print($EXCEPTION)
-      - pattern: console.error($EXCEPTION)
-      - pattern: System.out.println($EXCEPTION)
-      - pattern: logger.error($EXCEPTION)
-
-  - id: R004
-    message: "Frame injection detected via iframe creation or window.open."
-    severity: WARNING
-    languages: [javascript]
-    pattern-either:
-      - pattern: document.createElement('iframe')
-      - pattern: window.open($URL)
-
-  - id: R005
-    message: "Unvalidated URL redirection may allow phishing attacks."
-    severity: ERROR
-    languages: [javascript, java]
-    pattern-either:
-      - pattern: window.location.href = $URL
-      - pattern: response.sendRedirect($URL)
-      - pattern: res.redirect($URL)
-
-  - id: R006
-    message: "Missing session timeout configuration."
-    severity: WARNING
-    languages: [java]
-    pattern-either:
-      - pattern: session.setMaxInactiveInterval(0)
-      - pattern: cookie.setMaxAge(0)
-
-  - id: R007
-    message: "Sensitive data exposed in GET URL parameters."
-    severity: ERROR
-    languages: [javascript, java]
-    pattern-either:
-      - pattern: location.search.includes("password")
-      - pattern: request.getParameter("password")
-
-  - id: R008
-    message: "Session ID cookies not marked secure."
-    severity: ERROR
-    languages: [javascript, java]
-    pattern-either:
-      - pattern: document.cookie = $COOKIE
-      - pattern: session.setAttribute("JSESSIONID", $ID)
-
-  - id: R009
-    message: "Cross-frame scripting risk via frameElement manipulation."
-    severity: WARNING
-    languages: [javascript]
-    pattern-either:
-      - pattern: window.frameElement
-      - pattern: frameElement.src = $SRC
-
-  - id: R010
-    message: "Sensitive info displayed in clear text."
-    severity: ERROR
-    languages: [javascript]
-    pattern-either:
-      - pattern: console.log("password" + $VAL)
-      - pattern: document.getElementById("password").value
-
-  - id: R011
-    message: "Sensitive info cached via public headers."
-    severity: WARNING
-    languages: [java]
-    pattern: response.setHeader("Cache-Control", "public")
-
-  - id: R012
-    message: "Weak encryption algorithm detected."
-    severity: ERROR
-    languages: [python, java]
-    pattern-either:
-      - pattern: hashlib.md5($DATA)
-      - pattern: MessageDigest.getInstance("SHA-1")
-      - pattern: Crypto.createCipher("des")
-
-  - id: R013
-    message: "CRLF injection via unsanitized header or log input."
-    severity: ERROR
-    languages: [java, python]
-    pattern-either:
-      - pattern: header = "Location: " + $USER_INPUT
-      - pattern: logger.info($MESSAGE)
-
-  - id: R014
-    message: "Trust boundary violation: unvalidated input used in config or system settings."
-    severity: ERROR
-    languages: [python, java]
-    pattern-either:
-      - pattern: config[$KEY] = request.GET[$INPUT]
-      - pattern: System.setProperty($PROP, $USER_INPUT)
-
-  - id: R015
-    message: "Directory traversal via user-controlled file paths."
-    severity: ERROR
-    languages: [python, java]
-    pattern-either:
-      - pattern: open("../../" + $FILE)
-      - pattern: new File("../../" + $FILE)
-
-  - id: R016
-    message: "Session fixation vulnerability: session reused after login."
-    severity: ERROR
-    languages: [python, java]
-    pattern-either:
-      - pattern: session["user"] = $USER
-      - pattern: request.getSession(false)
-
-  - id: R017
-    message: "Risky cryptographic algorithm detected."
-    severity: ERROR
-    languages: [python, java]
-    pattern-either:
-      - pattern: hashlib.md5($DATA)
-      - pattern: MessageDigest.getInstance("SHA-1")
-
-  - id: R018
-    message: "Credentials stored in plain text."
-    severity: ERROR
-    languages: [python, javascript]
-    pattern-either:
-      - pattern: password = $VAL
-      - pattern: apiKey = $VAL
-
-  - id: R019
-    message: "SQL injection risk in Hibernate query construction."
-    severity: ERROR
-    languages: [java]
-    pattern-either:
-      - pattern: session.createQuery("from " + $TABLE + " where " + $COND)
-      - pattern: entityManager.createQuery($QUERY + $USER_INPUT)
-
-  - id: R020
-    message: "Improper resource shutdown: missing close/disconnect."
-    severity: WARNING
-    languages: [java]
-    pattern-either:
-      - pattern: new FileInputStream($FILE)
-      - pattern: new Socket($HOST)
-      - pattern: BufferedReader($READER)
-      - pattern: DatabaseConnection.disconnect()
+{
+  "rules": [
+    {
+      "id": "R001",
+      "message": "Possible SQL injection via string concatenation in query execution.",
+      "severity": "ERROR",
+      "languages": ["java", "python"],
+      "pattern-either": [
+        { "pattern": "$DB.execute($QUERY + $USER_INPUT)" },
+        { "pattern": "$DB.prepareStatement($QUERY + $USER_INPUT)" }
+      ]
+    },
+    {
+      "id": "R002",
+      "message": "Assignment to innerHTML or use of document.write can lead to XSS vulnerabilities.",
+      "severity": "ERROR",
+      "languages": ["javascript"],
+      "pattern-either": [
+        { "pattern": "$OBJ.innerHTML = $VAL" },
+        { "pattern": "document.write($VAL)" }
+      ]
+    },
+    {
+      "id": "R003",
+      "message": "Sensitive exception info may be leaked via logging or printing.",
+      "severity": "WARNING",
+      "languages": ["python", "java", "javascript"],
+      "pattern-either": [
+        { "pattern": "print($EXCEPTION)" },
+        { "pattern": "console.error($EXCEPTION)" },
+        { "pattern": "System.out.println($EXCEPTION)" },
+        { "pattern": "logger.error($EXCEPTION)" }
+      ]
+    },
+    {
+      "id": "R004",
+      "message": "Frame injection detected via iframe creation or window.open.",
+      "severity": "WARNING",
+      "languages": ["javascript"],
+      "pattern-either": [
+        { "pattern": "document.createElement('iframe')" },
+        { "pattern": "window.open($URL)" }
+      ]
+    },
+    {
+      "id": "R005",
+      "message": "Unvalidated URL redirection may allow phishing attacks.",
+      "severity": "ERROR",
+      "languages": ["javascript", "java"],
+      "pattern-either": [
+        { "pattern": "window.location.href = $URL" },
+        { "pattern": "response.sendRedirect($URL)" },
+        { "pattern": "res.redirect($URL)" }
+      ]
+    },
+    {
+      "id": "R006",
+      "message": "Missing session timeout configuration.",
+      "severity": "WARNING",
+      "languages": ["java"],
+      "pattern-either": [
+        { "pattern": "session.setMaxInactiveInterval(0)" },
+        { "pattern": "cookie.setMaxAge(0)" }
+      ]
+    },
+    {
+      "id": "R007",
+      "message": "Sensitive data exposed in GET URL parameters.",
+      "severity": "ERROR",
+      "languages": ["javascript", "java"],
+      "pattern-either": [
+        { "pattern": "location.search.includes(\"password\")" },
+        { "pattern": "request.getParameter(\"password\")" }
+      ]
+    },
+    {
+      "id": "R008",
+      "message": "Session ID cookies not marked secure.",
+      "severity": "ERROR",
+      "languages": ["javascript", "java"],
+      "pattern-either": [
+        { "pattern": "document.cookie = $COOKIE" },
+        { "pattern": "session.setAttribute(\"JSESSIONID\", $ID)" }
+      ]
+    },
+    {
+      "id": "R009",
+      "message": "Cross-frame scripting risk via frameElement manipulation.",
+      "severity": "WARNING",
+      "languages": ["javascript"],
+      "pattern-either": [
+        { "pattern": "window.frameElement" },
+        { "pattern": "frameElement.src = $SRC" }
+      ]
+    },
+    {
+      "id": "R010",
+      "message": "Sensitive info displayed in clear text.",
+      "severity": "ERROR",
+      "languages": ["javascript"],
+      "pattern-either": [
+        { "pattern": "console.log(\"password\" + $VAL)" },
+        { "pattern": "document.getElementById(\"password\").value" }
+      ]
+    },
+    {
+      "id": "R011",
+      "message": "Sensitive info cached via public headers.",
+      "severity": "WARNING",
+      "languages": ["java"],
+      "pattern": "response.setHeader(\"Cache-Control\", \"public\")"
+    },
+    {
+      "id": "R012",
+      "message": "Weak encryption algorithm detected.",
+      "severity": "ERROR",
+      "languages": ["python", "java"],
+      "pattern-either": [
+        { "pattern": "hashlib.md5($DATA)" },
+        { "pattern": "MessageDigest.getInstance(\"SHA-1\")" },
+        { "pattern": "Crypto.createCipher(\"des\")" }
+      ]
+    },
+    {
+      "id": "R013",
+      "message": "CRLF injection via unsanitized header or log input.",
+      "severity": "ERROR",
+      "languages": ["java", "python"],
+      "pattern-either": [
+        { "pattern": "header = \"Location: \" + $USER_INPUT" },
+        { "pattern": "logger.info($MESSAGE)" }
+      ]
+    },
+    {
+      "id": "R014",
+      "message": "Trust boundary violation: unvalidated input used in config or system settings.",
+      "severity": "ERROR",
+      "languages": ["python", "java"],
+      "pattern-either": [
+        { "pattern": "config[$KEY] = request.GET[$INPUT]" },
+        { "pattern": "System.setProperty($PROP, $USER_INPUT)" }
+      ]
+    },
+    {
+      "id": "R015",
+      "message": "Directory traversal via user-controlled file paths.",
+      "severity": "ERROR",
+      "languages": ["python", "java"],
+      "pattern-either": [
+        { "pattern": "open(\"../../\" + $FILE)" },
+        { "pattern": "new File(\"../../\" + $FILE)" }
+      ]
+    },
+    {
+      "id": "R016",
+      "message": "Session fixation vulnerability: session reused after login.",
+      "severity": "ERROR",
+      "languages": ["python", "java"],
+      "pattern-either": [
+        { "pattern": "session[\"user\"] = $USER" },
+        { "pattern": "request.getSession(false)" }
+      ]
+    },
+    {
+      "id": "R017",
+      "message": "Risky cryptographic algorithm detected.",
+      "severity": "ERROR",
+      "languages": ["python", "java"],
+      "pattern-either": [
+        { "pattern": "hashlib.md5($DATA)" },
+        { "pattern": "MessageDigest.getInstance(\"SHA-1\")" }
+      ]
+    },
+    {
+      "id": "R018",
+      "message": "Credentials stored in plain text.",
+      "severity": "ERROR",
+      "languages": ["python", "javascript"],
+      "pattern-either": [
+        { "pattern": "password = $VAL" },
+        { "pattern": "apiKey = $VAL" }
+      ]
+    },
+    {
+      "id": "R019",
+      "message": "SQL injection risk in Hibernate query construction.",
+      "severity": "ERROR",
+      "languages": ["java"],
+      "pattern-either": [
+        { "pattern": "session.createQuery(\"from \" + $TABLE + \" where \" + $COND)" },
+        { "pattern": "entityManager.createQuery($QUERY + $USER_INPUT)" }
+      ]
+    },
+    {
+      "id": "R020",
+      "message": "Improper resource shutdown: missing close/disconnect.",
+      "severity": "WARNING",
+      "languages": ["java"],
+      "pattern-either": [
+        { "pattern": "new FileInputStream($FILE)" },
+        { "pattern": "new Socket($HOST)" },
+        { "pattern": "BufferedReader($READER)" },
+        { "pattern": "DatabaseConnection.disconnect()" }
+      ]
+    }
+  ]
+}
