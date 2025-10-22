@@ -1,10 +1,10 @@
-name: Semgrep OWASP Scan
+name: Semgrep Manual OWASP Scan
 
 on:
   workflow_dispatch:
     inputs:
       rule_count:
-        description: 'Number of OWASP rules to include'
+        description: 'Input the number of OWASP rules that you want to include (Default is 5)'
         required: true
         default: '5'
 
@@ -29,5 +29,11 @@ jobs:
           export RULE_COUNT=${{ github.event.inputs.rule_count }}
           python generate_yaml.py
 
-      - name: Run Semgrep
-        run: semgrep --config semgrep_scan.yaml || true
+      - name: Run Semgrep and save results
+        run: semgrep --config semgrep_scan.yaml --json > semgrep_results.json
+        continue-on-error: true
+
+      - name: Count vulnerabilities
+        run: |
+          count=$(jq '.results | length' semgrep_results.json)
+          echo "🔍 Semgrep scan completed with $count findings."
