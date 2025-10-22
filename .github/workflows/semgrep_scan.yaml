@@ -40,7 +40,7 @@ jobs:
           echo "findings=$count" >> $GITHUB_ENV
 
       - name: Upload Semgrep results as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: semgrep-findings
           path: semgrep_results.json
