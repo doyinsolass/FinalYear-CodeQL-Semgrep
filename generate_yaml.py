@@ -16,7 +16,7 @@ def generate_yaml(selected_rules, output_path='semgrep_scan.yaml'):
             'id': rule['id'],
             'message': rule['description'],
             'severity': 'ERROR',
-            'languages': ['python', 'javascript', 'java'],
+            'languages': ['generic'],
             'patterns': [{'pattern': p} for p in rule['patterns']]
         }
         yaml_structure['rules'].append(yaml_rule)
