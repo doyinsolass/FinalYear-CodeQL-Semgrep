@@ -1,10 +1,10 @@
-name: Semgrep Manual OWASP Scan
+name: Semgrep OWASP Scan
 
 on:
   workflow_dispatch:
     inputs:
       rule_count:
-        description: 'Input the number of OWASP rules that you want to include (Default is 5)'
+        description: 'Number of OWASP rules to include'
         required: true
         default: '5'
 
@@ -22,7 +22,7 @@ jobs:
           python-version: '3.x'
 
       - name: Install dependencies
-        run: pip install semgrep pyyaml
+        run: pip install semgrep pyyaml jq
 
       - name: Generate Semgrep YAML
         run: |
@@ -37,3 +37,10 @@ jobs:
         run: |
           count=$(jq '.results | length' semgrep_results.json)
           echo "🔍 Semgrep scan completed with $count findings."
+          echo "findings=$count" >> $GITHUB_ENV
+
+      - name: Upload Semgrep results as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: semgrep-findings
+          path: semgrep_results.json
