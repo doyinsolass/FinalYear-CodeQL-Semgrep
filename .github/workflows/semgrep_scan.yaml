@@ -31,4 +31,3 @@ jobs:
 
       - name: Run Semgrep
         run: semgrep --config semgrep_scan.yaml --error
-
