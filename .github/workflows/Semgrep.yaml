@@ -102,23 +102,18 @@ jobs:
         with:
           sarif_file: semgrep-results.sarif
 
-      - name: Count vulnerabilities
-        run: |
-          count=$(jq '.results | length' semgrep_results.json)
-          echo "🔍 Semgrep scan completed with $count findings."
-          echo "findings=$count" >> $GITHUB_ENV
-    
-          - name: Show Semgrep summary
-
-      - name: Showing Semgrep summary  
+      - name: Display Semgrep scan summary
         if: always()
         run: |
-          echo "### 🧾 Semgrep Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "### 🧾 Semgrep Security Scan Summary" >> $GITHUB_STEP_SUM
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Total Vulnerabilities Found:** ${{ env.findings }}" >> $GITHUB_STEP_SUMMARY
+          findings_count=$(jq '.runs[0].results | length' semgrep-results.sarif)
+          echo "**Total Vulnerabilities Found:** $findings_count" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ env.findings }}" -gt 0 ]; then
-            echo "⚠️ Some vulnerabilities were detected. Review semgrep_results.json for details." >> $GITHUB_STEP_SUMMARY
+          if [ "$findings_count" -gt 0 ]; then
+            echo "⚠️ Vulnerabilities were detected. Please review the SARIF report in the Security tab." >> $GITHUB_STEP_SUMMARY
           else
             echo "✅ No vulnerabilities detected!" >> $GITHUB_STEP_SUMMARY
-          fi
+          fiMARY 
+
+          
