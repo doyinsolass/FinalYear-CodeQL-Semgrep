@@ -8,7 +8,7 @@
  
 **Tools:** GitHub, GitHub Actions, DefectDojo, Playwright
  
-**Aim:** I aim to develop and test custom security rules in GitLab and use these 2 open source SAST tools, Semgrep and CodeQL. I would also like to automate the security scan that uses the rules using GitLab CI/CD workflows. This workflow will automatically scan the repository after every code push to check for vulnerabilities and coding issues. I will also use intentionally vulnerable web applications such as WebGoat and JuiceShop to test these security rules. I will also explain how important security checks and verification is in the software development lifecycle to further express how important security is.
+**Aim:** I aim to develop and test custom security rules in GitHub and use these 2 open source SAST tools, Semgrep and CodeQL. I would also like to automate the security scan that uses the rules using GitLab CI/CD workflows. This workflow will automatically scan the repository after every code push to check for vulnerabilities and coding issues. I will also use intentionally vulnerable web applications such as WebGoat and JuiceShop to test these security rules. I will also explain how important security checks and verification is in the software development lifecycle to further express how important security is.
 
 | Chapters | Description          |
 | ------- | ------------------ |
