@@ -101,3 +101,24 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: semgrep-results.sarif
+
+      - name: Count vulnerabilities
+        run: |
+          count=$(jq '.results | length' semgrep_results.json)
+          echo "🔍 Semgrep scan completed with $count findings."
+          echo "findings=$count" >> $GITHUB_ENV
+    
+          - name: Show Semgrep summary
+
+      - name: Showing Semgrep summary  
+        if: always()
+        run: |
+          echo "### 🧾 Semgrep Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Total Vulnerabilities Found:** ${{ env.findings }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ env.findings }}" -gt 0 ]; then
+            echo "⚠️ Some vulnerabilities were detected. Review semgrep_results.json for details." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ No vulnerabilities detected!" >> $GITHUB_STEP_SUMMARY
+          fi
