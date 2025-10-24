@@ -105,7 +105,7 @@ jobs:
       - name: Display Semgrep scan summary
         if: always()
         run: |
-          echo "### 🧾 Semgrep Security Scan Summary" >> $GITHUB_STEP_SUM
+          echo "### 🧾 Semgrep Security Scan Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           findings_count=$(jq '.runs[0].results | length' semgrep-results.sarif)
           echo "**Total Vulnerabilities Found:** $findings_count" >> $GITHUB_STEP_SUMMARY
@@ -114,6 +114,6 @@ jobs:
             echo "⚠️ Vulnerabilities were detected. Please review the SARIF report in the Security tab." >> $GITHUB_STEP_SUMMARY
           else
             echo "✅ No vulnerabilities detected!" >> $GITHUB_STEP_SUMMARY
-          fiMARY 
+          fi
 
           
