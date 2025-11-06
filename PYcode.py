@@ -1,4 +1,3 @@
-# Python Code with Hardcoded Credentials
 import mysql.connector
 
 def get_user(user_id):
@@ -14,8 +13,7 @@ def get_user(user_id):
     connection.close()
     return result
 
-# Python Code with Use of Insecure Functions
 import os
 
 def execute_command(command):
-    os.system(command)  # Insecure: allows command injection
+    os.system(command) 
