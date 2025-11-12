@@ -56,4 +56,12 @@ jobs:
             echo "⚠️ Some vulnerabilities were detected. Review semgrep_results.sarif for details." >> $GITHUB_STEP_SUMMARY
           else
             echo "✅ No vulnerabilities detected!" >> $GITHUB_STEP_SUMMARY
-          fi
+
+      - name: Upload SARIF to DefectDojo
+        uses: C4tWithShell/defectdojo-action@1.0.5
+        with:
+          token: ${{ secrets.DEFECTOJO_TOKEN }}
+          defectdojo_url: ${{ secrets.DEFECTOJO_URL }}
+          product_type: "example"
+          product: ${{ github.repository }}
+          engagement: ${{ github.ref_name }}
