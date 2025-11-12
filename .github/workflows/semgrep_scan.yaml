@@ -78,8 +78,8 @@ jobs:
           token: ${{ secrets.DEFECTOJO_TOKEN }}
           defectdojo_url: ${{ secrets.DEFECTOJO_URL }}
           product_type: "example"
-          product: ${{ github.repository }}
-          engagement: ${{ github.ref_name }}
+          product: "FinalYear-CodeQL-Semgrep"
+          engagement: "main"
           environment: "GitHub Actions"
           tools: "Semgrep"
           reports: semgrep_results.sarif
