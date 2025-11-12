@@ -77,4 +77,6 @@ jobs:
           product_type: "example"
           product: ${{ github.repository }}
           engagement: ${{ github.ref_name }}
-          file: semgrep_results.sarif
+          environment: "GitHub Actions"
+          reports: semgrep_results.sarif
+
