@@ -78,5 +78,6 @@ jobs:
           product: ${{ github.repository }}
           engagement: ${{ github.ref_name }}
           environment: "GitHub Actions"
+          tools: "Semgrep"
           reports: semgrep_results.sarif
 
