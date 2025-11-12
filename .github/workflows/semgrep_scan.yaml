@@ -10,7 +10,7 @@ on:
 
 jobs:
   semgrep:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -30,12 +30,12 @@ jobs:
           python generate_yaml.py
 
       - name: Run Semgrep and save results
-        run: semgrep --config semgrep_scan.yaml --json > semgrep_results.json
+        run: semgrep --config semgrep_scan.yaml --sarif > semgrep_results.sarif
         continue-on-error: true
 
       - name: Count vulnerabilities
         run: |
-          count=$(jq '.results | length' semgrep_results.json)
+          count=$(jq '.runs[0].results | length' semgrep_results.sarif)
           echo "🔍 Semgrep scan completed with $count findings."
           echo "findings=$count" >> $GITHUB_ENV
 
@@ -43,7 +43,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: semgrep-findings
-          path: semgrep_results.json
+          path: semgrep_results.sarif
 
       - name: Show Semgrep summary
         if: always()
@@ -57,6 +57,15 @@ jobs:
           else
             echo "✅ No vulnerabilities detected!" >> $GITHUB_STEP_SUMMARY
 
+  defectdojo-upload:
+    runs-on: self-hosted
+    needs: semgrep
+    steps:
+      - name: Download SARIF artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: semgrep-findings
+
       - name: Upload SARIF to DefectDojo
         uses: C4tWithShell/defectdojo-action@1.0.5
         with:
@@ -65,3 +74,4 @@ jobs:
           product_type: "example"
           product: ${{ github.repository }}
           engagement: ${{ github.ref_name }}
+          file: semgrep_results.sarif
