@@ -77,7 +77,7 @@ jobs:
         with:
           token: ${{ secrets.DEFECTOJO_TOKEN }}
           defectdojo_url: ${{ secrets.DEFECTOJO_URL }}
-          product_type: "example"
+          product_type: "Research and Development"
           product: "FinalYear-CodeQL-Semgrep"
           engagement: "main"
           environment: "GitHub Actions"
