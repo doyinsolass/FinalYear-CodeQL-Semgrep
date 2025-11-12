@@ -56,6 +56,8 @@ jobs:
             echo "⚠️ Some vulnerabilities were detected. Review semgrep_results.sarif for details." >> $GITHUB_STEP_SUMMARY
           else
             echo "✅ No vulnerabilities detected!" >> $GITHUB_STEP_SUMMARY
+          fi
+        shell: bash
 
 
   defectdojo-upload:
