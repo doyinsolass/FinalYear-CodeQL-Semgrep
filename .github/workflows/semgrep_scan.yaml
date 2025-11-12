@@ -57,6 +57,7 @@ jobs:
           else
             echo "✅ No vulnerabilities detected!" >> $GITHUB_STEP_SUMMARY
 
+
   defectdojo-upload:
     runs-on: self-hosted
     needs: semgrep
