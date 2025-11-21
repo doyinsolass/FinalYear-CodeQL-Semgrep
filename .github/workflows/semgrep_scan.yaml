@@ -91,4 +91,4 @@ jobs:
           tools: "Semgrep"
           file_type: "sarif"
 
-          reports: "semgrep_results.sarif"
+          reports: "semgrep-findings/semgrep_results.sarif"
