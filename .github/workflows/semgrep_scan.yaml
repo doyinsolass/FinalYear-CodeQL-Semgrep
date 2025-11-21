@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       rule_count:
-        description: 'Number of OWASP rules to include'
+        description: "Number of OWASP rules to include"
         required: true
-        default: '5'
+        default: "5"
 
 jobs:
   semgrep:
@@ -19,7 +19,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
+          python-version: "3.x"
 
       - name: Install dependencies
         run: pip install semgrep pyyaml jq
@@ -36,7 +36,6 @@ jobs:
       - name: Count vulnerabilities
         run: |
           count=$(jq '.runs[0].results | length' semgrep_results.sarif)
-          echo "🔍 Semgrep scan completed with $count findings."
           echo "findings=$count" >> $GITHUB_ENV
 
       - name: Upload Semgrep results as artifact
@@ -48,26 +47,31 @@ jobs:
       - name: Show Semgrep summary
         if: always()
         run: |
-          echo "### 🧾 Semgrep Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "### Semgrep Scan Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Total Vulnerabilities Found:** ${{ env.findings }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ "${{ env.findings }}" -gt 0 ]; then
-            echo "⚠️ Some vulnerabilities were detected. Review semgrep_results.sarif for details." >> $GITHUB_STEP_SUMMARY
+            echo "Some vulnerabilities were detected. Review semgrep_results.sarif for details." >> $GITHUB_STEP_SUMMARY
           else
-            echo "✅ No vulnerabilities detected!" >> $GITHUB_STEP_SUMMARY
+            echo "No vulnerabilities detected." >> $GITHUB_STEP_SUMMARY
           fi
-        shell: bash
-
 
   defectdojo-upload:
     runs-on: self-hosted
     needs: semgrep
+
     steps:
       - name: Download SARIF artifact
         uses: actions/download-artifact@v4
         with:
           name: semgrep-findings
+
+      - name: Verify SARIF exists
+        run: ls -R .
+
+      - name: Rename SARIF file
+        run: mv semgrep_results.sarif semgrep_results.sarif
 
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
@@ -77,10 +81,14 @@ jobs:
         with:
           token: ${{ secrets.DEFECTOJO_TOKEN }}
           defectdojo_url: ${{ secrets.DEFECTOJO_URL }}
+
           product_type: "Research and Development"
           product: "FinalYear-CodeQL-Semgrep"
           engagement: "main"
+
+          test_type: "Semgrep Scan"
           environment: "GitHub Actions"
           tools: "Semgrep"
-          reports: semgrep_results.sarif
+          file_type: "sarif"
 
+          reports: "semgrep_results.sarif"
