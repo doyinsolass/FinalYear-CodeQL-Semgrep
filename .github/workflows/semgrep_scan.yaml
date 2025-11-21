@@ -70,9 +70,6 @@ jobs:
       - name: Verify SARIF exists
         run: ls -R .
 
-      - name: Rename SARIF file
-        run: mv semgrep_results.sarif semgrep_results.sarif
-
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
