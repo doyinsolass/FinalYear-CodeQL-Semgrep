@@ -1,4 +1,4 @@
-name: Semgrep OWASP Scan
+name: Semgrep OWASP Scan 
 
 on:
   workflow_dispatch:
