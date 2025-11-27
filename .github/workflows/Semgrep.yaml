@@ -116,4 +116,8 @@ jobs:
             echo "✅ No vulnerabilities detected!" >> $GITHUB_STEP_SUMMARY
           fi
 
+      - name: Print SARIF file
+        run: cat semgrep-results.sarif
+
+
           
