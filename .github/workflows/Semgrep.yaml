@@ -116,8 +116,11 @@ jobs:
             echo "✅ No vulnerabilities detected!" >> $GITHUB_STEP_SUMMARY
           fi
 
-      - name: Print SARIF file
-        run: cat semgrep-results.sarif
+      - name: Upload SARIF file as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-results
+          path: semgrep-results.sarif
 
 
           
