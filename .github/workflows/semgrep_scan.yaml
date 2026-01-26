@@ -78,12 +78,13 @@ jobs:
         with:
           token: ${{ secrets.DEFECTOJO_TOKEN }}
           defectdojo_url: ${{ secrets.DEFECTOJO_URL }}
-
+      
           product_type: "Research and Development"
           product: "FinalYear-CodeQL-Semgrep"
-          engagement: "main"
-
+          engagement: "import"
+      
           environment: "GitHub Actions"
           tools: "Semgrep"
-
+          scan_type: "SARIF"  
           reports: "semgrep-findings/semgrep_results.sarif"
+
