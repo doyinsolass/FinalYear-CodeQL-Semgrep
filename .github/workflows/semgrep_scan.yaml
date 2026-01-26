@@ -92,16 +92,17 @@ jobs:
         env:
           URL: ${{ secrets.DEFECT_DOJO_URL }}
 
-
-
       - name: Upload Semgrep results to DefectDojo
         uses: portswigger-cloud/defectdojo-import-scan@main
+        env:
+          DEFECT_DOJO_URL: ${{ secrets.DEFECT_DOJO_URL }}
+          DEFECT_DOJO_USERNAME: ${{ secrets.DEFECT_DOJO_USERNAME }}
+          DEFECT_DOJO_PASSWORD: ${{ secrets.DEFECT_DOJO_PASSWORD }}
         with:
           defectdojo-url: ${{ secrets.DEFECT_DOJO_URL }}
           defectdojo-username: ${{ secrets.DEFECT_DOJO_USERNAME }}
           defectdojo-password: ${{ secrets.DEFECT_DOJO_PASSWORD }}
-      
-          defectdojo-product-type: "1" 
+          defectdojo-product-type: "1"
           defectdojo-product: "FinalYear-CodeQL-Semgrep"
           defectdojo-engagement-name: "import"
           defectdojo-environment-type: "GitHub Actions"
