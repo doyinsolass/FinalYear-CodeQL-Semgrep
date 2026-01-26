@@ -80,8 +80,8 @@ jobs:
         uses: portswigger-cloud/defectdojo-import-scan@main
         with:
           defectdojo-url: ${{ secrets.DEFECTOJO_URL }}
-          defectdojo-username: ${{ secrets.DEFECTOJO_USERNAME }}
-          defectdojo-password: ${{ secrets.DEFECTOJO_PASSWORD }}
+          defectdojo-username: ${{ secrets.DEFECTDOJO_USERNAME }}
+          defectdojo-password: ${{ secrets.DEFECTDOJO_PASSWORD }}
       
           defectdojo-product-type: "1" 
           defectdojo-product: "FinalYear-CodeQL-Semgrep"
