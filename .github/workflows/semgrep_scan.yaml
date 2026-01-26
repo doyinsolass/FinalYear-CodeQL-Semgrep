@@ -81,7 +81,7 @@ jobs:
           echo "Secrets available:"
           echo "${{ toJson(secrets) }}"
 
-      - name: Upload SARIF to DefectDojo (manual)
+      - name: Upload SARIF to DefectDojo (manual debug)
         env:
           DEFECT_DOJO_URL: ${{ secrets.DEFECT_DOJO_URL }}
           DEFECT_DOJO_USERNAME: ${{ secrets.DEFECT_DOJO_USERNAME }}
@@ -89,20 +89,14 @@ jobs:
         run: |
           echo "Authenticating with DefectDojo..."
       
-          TOKEN=$(curl -s -X POST \
+          echo "Raw auth response:"
+          curl -s -X POST \
             -H "Content-Type: application/json" \
             -d '{"username": "'"${DEFECT_DOJO_USERNAME}"'", "password": "'"${DEFECT_DOJO_PASSWORD}"'"}' \
-            "${DEFECT_DOJO_URL}/api/v2/api-token-auth/" | jq -r .token)
+            "${DEFECT_DOJO_URL}/api/v2/api-token-auth/"
       
-          echo "Token received: ${#TOKEN} characters"
-      
-          echo "Uploading SARIF..."
-          curl -s -X POST \
-            -H "Authorization: Token $TOKEN" \
-            -F "file=@semgrep-findings/semgrep_results.sarif" \
-            -F "scan_type=SARIF" \
-            -F "product_name=FinalYear-CodeQL-Semgrep" \
-            -F "engagement_name=import" \
-            "${DEFECT_DOJO_URL}/api/v2/import-scan/"
+          echo ""
+          echo "Stopping here so we can read the response."
+          exit 0
 
 
