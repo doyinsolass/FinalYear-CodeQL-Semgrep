@@ -70,8 +70,11 @@ jobs:
       - name: Verify SARIF exists
         run: ls -R .
 
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: Install jq (fast)
+        run: |
+          curl -L -o jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
+          chmod +x jq
+          sudo mv jq /usr/local/bin
 
       - name: Upload SARIF to DefectDojo
         uses: C4tWithShell/defectdojo-action@1.0.5
