@@ -99,7 +99,7 @@ jobs:
           echo "Uploading SARIF..."
           curl -s -X POST \
             -H "Authorization: Token $TOKEN" \
-            -F "file=@semgrep-findings/semgrep_results.sarif" \
+            -F "file=@semgrep_results.sarif" \
             -F "scan_type=SARIF" \
             -F "product_name=FinalYear-CodeQL-Semgrep" \
             -F "engagement_name=import" \
