@@ -76,6 +76,12 @@ jobs:
           chmod +x jq
           sudo mv jq /usr/local/bin
 
+      - name: Debug secret names
+        run: |
+          echo "Secrets available:"
+          echo "${{ toJson(secrets) }}"
+
+
       - name: Upload Semgrep results to DefectDojo
         uses: portswigger-cloud/defectdojo-import-scan@main
         with:
