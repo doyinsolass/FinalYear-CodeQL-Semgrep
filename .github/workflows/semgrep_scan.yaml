@@ -76,17 +76,13 @@ jobs:
           chmod +x jq
           sudo mv jq /usr/local/bin
 
-      - name: Upload SARIF to DefectDojo
-        uses: C4tWithShell/defectdojo-action@1.0.5
+      - name: Upload Semgrep results to DefectDojo
+        uses: portswigger-cloud/defectdojo-import-scan@main
         with:
-          token: ${{ secrets.DEFECTOJO_TOKEN }}
           defectdojo_url: ${{ secrets.DEFECTOJO_URL }}
-      
-          product_type: "1"
-          product: "FinalYear-CodeQL-Semgrep"
-          engagement: "import"
-      
-          environment: "GitHub Actions"
-          tools: "Semgrep"
-          reports: "semgrep-findings/semgrep_results.sarif"
+          defectdojo_api_key: ${{ secrets.DEFECTOJO_TOKEN }}
+          product_name: "FinalYear-CodeQL-Semgrep"
+          engagement_name: "import"
+          scan_type: "SARIF"
+          file: "semgrep-findings/semgrep_results.sarif"
 
