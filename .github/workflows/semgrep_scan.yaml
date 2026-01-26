@@ -92,21 +92,19 @@ jobs:
         env:
           URL: ${{ secrets.DEFECT_DOJO_URL }}
 
-      - name: Upload Semgrep results to DefectDojo
-        uses: portswigger-cloud/defectdojo-import-scan@main
-        env:
-          DEFECT_DOJO_URL: ${{ secrets.DEFECT_DOJO_URL }}
-          DEFECT_DOJO_USERNAME: ${{ secrets.DEFECT_DOJO_USERNAME }}
-          DEFECT_DOJO_PASSWORD: ${{ secrets.DEFECT_DOJO_PASSWORD }}
-        with:
-          defectdojo-url: ${{ secrets.DEFECT_DOJO_URL }}
-          defectdojo-username: ${{ secrets.DEFECT_DOJO_USERNAME }}
-          defectdojo-password: ${{ secrets.DEFECT_DOJO_PASSWORD }}
-          defectdojo-product-type: "1"
-          defectdojo-product: "FinalYear-CodeQL-Semgrep"
-          defectdojo-engagement-name: "import"
-          defectdojo-environment-type: "GitHub Actions"
-          defectdojo-scan-type: "SARIF"
-          scan-results-file-name: "semgrep-findings/semgrep_results.sarif"
+      - name: Upload SARIF to DefectDojo (manual)
+        run: |
+          TOKEN=$(curl -X POST \
+            -H "Content-Type: application/json" \
+            -d "{\"username\": \"${{ secrets.DEFECT_DOJO_USERNAME }}\", \"password\": \"${{ secrets.DEFECT_DOJO_PASSWORD }}\"}" \
+            ${{ secrets.DEFECT_DOJO_URL }}/api/v2/api-token-auth/ | jq -r .token)
+      
+          curl -X POST \
+            -H "Authorization: Token $TOKEN" \
+            -F "file=@semgrep-findings/semgrep_results.sarif" \
+            -F "scan_type=SARIF" \
+            -F "product_name=FinalYear-CodeQL-Semgrep" \
+            -F "engagement_name=import" \
+            ${{ secrets.DEFECT_DOJO_URL }}/api/v2/import-scan/
 
 
