@@ -82,8 +82,8 @@ jobs:
           echo "${{ toJson(secrets) }}"
 
       - name: Print DefectDojo URL
-        run: echo "DefectDojo URL: ${{ secrets.DEFECT_DOJO_URL }}"
-
+        run: |
+          echo "DefectDojo URL: ${{ secrets.DEFECT_DOJO_URL }}"
 
 
       - name: Upload Semgrep results to DefectDojo
