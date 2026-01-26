@@ -79,7 +79,7 @@ jobs:
       - name: Upload Semgrep results to DefectDojo
         uses: portswigger-cloud/defectdojo-import-scan@main
         with:
-          defectdojo-url: ${{ secrets.DEFECTOJO_URL }}
+          defectdojo-url: ${{ secrets.DEFECTDOJO_URL }}
           defectdojo-username: ${{ secrets.DEFECTDOJO_USERNAME }}
           defectdojo-password: ${{ secrets.DEFECTDOJO_PASSWORD }}
       
