@@ -85,6 +85,14 @@ jobs:
         run: |
           echo "DefectDojo URL: ${{ secrets.DEFECT_DOJO_URL }}"
 
+      - name: Print raw DefectDojo URL and length
+        run: |
+          echo "Raw URL: '${{ secrets.DEFECT_DOJO_URL }}'"
+          echo "Length: ${#URL}"
+        env:
+          URL: ${{ secrets.DEFECT_DOJO_URL }}
+
+
 
       - name: Upload Semgrep results to DefectDojo
         uses: portswigger-cloud/defectdojo-import-scan@main
