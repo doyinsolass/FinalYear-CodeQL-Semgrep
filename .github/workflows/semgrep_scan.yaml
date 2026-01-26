@@ -85,9 +85,9 @@ jobs:
       - name: Upload Semgrep results to DefectDojo
         uses: portswigger-cloud/defectdojo-import-scan@main
         with:
-          defectdojo-url: ${{ secrets.DEFECTDOJO_URL }}
-          defectdojo-username: ${{ secrets.DEFECTDOJO_USERNAME }}
-          defectdojo-password: ${{ secrets.DEFECTDOJO_PASSWORD }}
+          defectdojo-url: ${{ secrets.DEFECT_DOJO_URL }}
+          defectdojo-username: ${{ secrets.DEFECT_DOJO_USERNAME }}
+          defectdojo-password: ${{ secrets.DEFECT_DOJO_PASSWORD }}
       
           defectdojo-product-type: "1" 
           defectdojo-product: "FinalYear-CodeQL-Semgrep"
