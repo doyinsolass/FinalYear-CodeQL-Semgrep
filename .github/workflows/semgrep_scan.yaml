@@ -81,6 +81,10 @@ jobs:
           echo "Secrets available:"
           echo "${{ toJson(secrets) }}"
 
+      - name: Print DefectDojo URL
+        run: echo "DefectDojo URL: ${{ secrets.DEFECT_DOJO_URL }}"
+
+
 
       - name: Upload Semgrep results to DefectDojo
         uses: portswigger-cloud/defectdojo-import-scan@main
