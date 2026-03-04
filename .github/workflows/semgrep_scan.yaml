@@ -61,7 +61,7 @@ jobs:
           fi
 
   defectdojo-upload:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest     # changed from self-hosted
     needs: semgrep
 
     steps:
@@ -73,13 +73,14 @@ jobs:
       - name: Verify SARIF exists
         run: ls -R .
 
+      # jq is not preinstalled on ubuntu-latest in this way, so installing it is correct
       - name: Install jq (fast)
         run: |
           curl -L -o jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
           chmod +x jq
           sudo mv jq /usr/local/bin
 
-      # Remove this step once secrets are confirmed; it prints secret names (but not values)
+      # TEMP step – remove after confirming secrets are wired correctly
       - name: Debug secret names
         run: |
           echo "Secrets available:"
@@ -92,7 +93,6 @@ jobs:
           DEFECT_DOJO_PASSWORD: ${{ secrets.DEFECT_DOJO_PASSWORD }}
         run: |
           echo "Authenticating with DefectDojo..."
-
           TOKEN=$(curl -s -X POST \
             -H "Content-Type: application/json" \
             -d '{"username": "'"${DEFECT_DOJO_USERNAME}"'", "password": "'"${DEFECT_DOJO_PASSWORD}"'"}' \
@@ -104,7 +104,6 @@ jobs:
           fi
 
           echo "Token received: ${#TOKEN} characters"
-
           echo "Uploading SARIF..."
           curl -s -X POST \
             -H "Authorization: Token $TOKEN" \
