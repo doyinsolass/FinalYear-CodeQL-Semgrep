@@ -1,12 +1,7 @@
 name: Semgrep OWASP Scan 
 
 on:
-  workflow_dispatch:
-    inputs:
-      rule_count:
-        description: "Number of OWASP rules to include"
-        required: true
-        default: "5"
+  push:
 
 jobs:
   semgrep:
