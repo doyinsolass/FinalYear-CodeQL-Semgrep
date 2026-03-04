@@ -31,7 +31,6 @@ jobs:
         run: |
           export RULE_COUNT="${{ github.event.inputs.rule_count || '20' }}"
           python generate_yaml.py
-
       - name: Run Semgrep and save results
         run: semgrep --config semgrep_scan.yaml --sarif > semgrep_results.sarif
         continue-on-error: true
@@ -40,7 +39,6 @@ jobs:
         run: |
           count=$(jq '.runs[0].results | length' semgrep_results.sarif)
           echo "findings=$count" >> "$GITHUB_ENV"
-
       - name: Upload Semgrep results as artifact
         uses: actions/upload-artifact@v4
         with:
@@ -59,9 +57,8 @@ jobs:
           else
             echo "No vulnerabilities detected." >> "$GITHUB_STEP_SUMMARY"
           fi
-
   defectdojo-upload:
-    runs-on: ubuntu-latest     # changed from self-hosted
+    runs-on: self-hosted
     needs: semgrep
 
     steps:
@@ -73,19 +70,15 @@ jobs:
       - name: Verify SARIF exists
         run: ls -R .
 
-      # jq is not preinstalled on ubuntu-latest in this way, so installing it is correct
       - name: Install jq (fast)
         run: |
           curl -L -o jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
           chmod +x jq
           sudo mv jq /usr/local/bin
-
-      # TEMP step – remove after confirming secrets are wired correctly
       - name: Debug secret names
         run: |
           echo "Secrets available:"
           echo "${{ toJson(secrets) }}"
-
       - name: Upload SARIF to DefectDojo (manual)
         env:
           DEFECT_DOJO_URL: ${{ secrets.DEFECT_DOJO_URL }}
@@ -97,12 +90,10 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{"username": "'"${DEFECT_DOJO_USERNAME}"'", "password": "'"${DEFECT_DOJO_PASSWORD}"'"}' \
             "${DEFECT_DOJO_URL}/api/v2/api-token-auth/" | jq -r .token)
-
           if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
             echo "Failed to obtain DefectDojo token"
             exit 1
           fi
-
           echo "Token received: ${#TOKEN} characters"
           echo "Uploading SARIF..."
           curl -s -X POST \
