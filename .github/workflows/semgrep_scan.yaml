@@ -1,7 +1,9 @@
-name: Semgrep OWASP Scan 
+name: OWASP Rules Scan
 
 on:
   push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       rule_count:
@@ -15,10 +17,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.x"
 
@@ -27,7 +29,7 @@ jobs:
 
       - name: Generate Semgrep YAML
         run: |
-          export RULE_COUNT=${{ github.event.inputs.rule_count }}
+          export RULE_COUNT="${{ github.event.inputs.rule_count || '20' }}"
           python generate_yaml.py
 
       - name: Run Semgrep and save results
@@ -37,7 +39,7 @@ jobs:
       - name: Count vulnerabilities
         run: |
           count=$(jq '.runs[0].results | length' semgrep_results.sarif)
-          echo "findings=$count" >> $GITHUB_ENV
+          echo "findings=$count" >> "$GITHUB_ENV"
 
       - name: Upload Semgrep results as artifact
         uses: actions/upload-artifact@v4
@@ -48,14 +50,14 @@ jobs:
       - name: Show Semgrep summary
         if: always()
         run: |
-          echo "### Semgrep Scan Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Total Vulnerabilities Found:** ${{ env.findings }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Semgrep Scan Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Total Vulnerabilities Found:** ${{ env.findings }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
           if [ "${{ env.findings }}" -gt 0 ]; then
-            echo "Some vulnerabilities were detected. Review semgrep_results.sarif for details." >> $GITHUB_STEP_SUMMARY
+            echo "Some vulnerabilities were detected. Review semgrep_results.sarif for details." >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "No vulnerabilities detected." >> $GITHUB_STEP_SUMMARY
+            echo "No vulnerabilities detected." >> "$GITHUB_STEP_SUMMARY"
           fi
 
   defectdojo-upload:
@@ -77,6 +79,7 @@ jobs:
           chmod +x jq
           sudo mv jq /usr/local/bin
 
+      # Remove this step once secrets are confirmed; it prints secret names (but not values)
       - name: Debug secret names
         run: |
           echo "Secrets available:"
@@ -89,14 +92,19 @@ jobs:
           DEFECT_DOJO_PASSWORD: ${{ secrets.DEFECT_DOJO_PASSWORD }}
         run: |
           echo "Authenticating with DefectDojo..."
-      
+
           TOKEN=$(curl -s -X POST \
             -H "Content-Type: application/json" \
             -d '{"username": "'"${DEFECT_DOJO_USERNAME}"'", "password": "'"${DEFECT_DOJO_PASSWORD}"'"}' \
             "${DEFECT_DOJO_URL}/api/v2/api-token-auth/" | jq -r .token)
-      
+
+          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+            echo "Failed to obtain DefectDojo token"
+            exit 1
+          fi
+
           echo "Token received: ${#TOKEN} characters"
-      
+
           echo "Uploading SARIF..."
           curl -s -X POST \
             -H "Authorization: Token $TOKEN" \
@@ -105,6 +113,3 @@ jobs:
             -F "product_name=FinalYear-CodeQL-Semgrep" \
             -F "engagement_name=import" \
             "${DEFECT_DOJO_URL}/api/v2/import-scan/"
-
-
-
