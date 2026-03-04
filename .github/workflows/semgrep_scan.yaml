@@ -1,4 +1,4 @@
-name: OWASP RUles Scan 
+name: OWASP Rules Scan 
 
 on:
   workflow_dispatch:
@@ -11,6 +11,8 @@ on:
 jobs:
   semgrep:
     runs-on: ubuntu-latest
+    env:
+      RULE_COUNT: ${{ github.event.inputs.rule_count || '20' }}
 
     steps:
       - name: Checkout code
@@ -26,7 +28,6 @@ jobs:
 
       - name: Generate Semgrep YAML
         run: |
-          export RULE_COUNT=${{ github.event.inputs.rule_count }}
           python generate_yaml.py
       - name: Run Semgrep and save results
         run: semgrep --config semgrep_scan.yaml --sarif > semgrep_results.sarif
