@@ -10,7 +10,7 @@ on:
         default: "20"
 
 jobs:
-  semgrep-and-codeQL:
+  semgrep:
     runs-on: ubuntu-latest
     env:
       RULE_COUNT: ${{ github.event.inputs.rule_count || '20' }}
