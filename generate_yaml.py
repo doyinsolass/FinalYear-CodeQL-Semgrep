@@ -9,7 +9,7 @@ def load_rules(json_path):
 def select_rules(rules, count):
     return rules[:count]
 
-def generate_yaml(selected_rules, output_path='semgrep_scan.yaml'):
+def generate_yaml(selected_rules, output_path='generated_rules_scan.yaml'):
     yaml_structure = {'rules': selected_rules}
     with open(output_path, 'w') as f:
         yaml.dump(yaml_structure, f, sort_keys=False)
