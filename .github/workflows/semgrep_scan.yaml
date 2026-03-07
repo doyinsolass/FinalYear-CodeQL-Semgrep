@@ -2,6 +2,7 @@ name: OWASP Rules Scan
 
 on:
   push:
+  pull_request: 
   workflow_dispatch:
     inputs:
       rule_count:
