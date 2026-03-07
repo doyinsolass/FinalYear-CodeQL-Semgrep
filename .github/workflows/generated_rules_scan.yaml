@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       rule_count:
-        description: "Number of OWASP rules to include"
+        description: "Number of Generated Rules to run (Max 20)"
         required: true
         default: "20"
 
