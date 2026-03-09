@@ -32,16 +32,9 @@ jobs:
         run: |
           echo "Generating Semgrep rules for RULE_COUNT=$RULE_COUNT"
           python generate_yaml.py
-
-      - name: Show generated Semgrep config
-        run: |
-          echo "=== semgrep_scan.yaml ==="
-          cat semgrep_scan.yaml
-
       - name: Run Semgrep and save results
         run: |
           semgrep --config semgrep_scan.yaml --sarif > semgrep_results.sarif 2> semgrep_errors.log || true
-
       - name: Show Semgrep errors
         if: always()
         run: |
@@ -51,7 +44,6 @@ jobs:
           else
             echo "No semgrep_errors.log"
           fi
-
       - name: Count Semgrep vulnerabilities
         run: |
           if [ ! -f semgrep_results.sarif ]; then
@@ -62,7 +54,6 @@ jobs:
           count=$(jq '.runs[0].results | length' semgrep_results.sarif 2>/dev/null || echo 0)
           echo "Semgrep findings: $count"
           echo "semgrep_findings=$count" >> $GITHUB_ENV
-
       - name: Upload Semgrep results as artifact
         uses: actions/upload-artifact@v4
         with:
@@ -81,7 +72,6 @@ jobs:
           else
             echo "No vulnerabilities detected by Semgrep." >> $GITHUB_STEP_SUMMARY
           fi
-
   codeql:
     runs-on: ubuntu-latest
     needs: semgrep
@@ -135,7 +125,6 @@ jobs:
         run: |
           echo "Listing files after artifact download:"
           ls -R .
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -148,7 +137,6 @@ jobs:
         run: |
           echo "Merging semgrep_results.sarif and codeql-results.sarif into merged.sarif"
           python merge_sarif.py
-
       - name: Upload merged SARIF as artifact
         uses: actions/upload-artifact@v4
         with:
@@ -169,13 +157,11 @@ jobs:
         run: |
           echo "Listing files before upload:"
           ls -R .
-
       - name: Install jq (fast)
         run: |
           curl -L -o jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
           chmod +x jq
           sudo mv jq /usr/local/bin
-
       - name: Upload merged SARIF to DefectDojo
         env:
           DEFECT_DOJO_URL: ${{ secrets.DEFECT_DOJO_URL }}
@@ -199,4 +185,4 @@ jobs:
             -F "scan_type=SARIF" \
             -F "product_name=FinalYear-CodeQL-Semgrep" \
             -F "engagement_name=Generated Rules Scan" \
-            "${DEFECT_DOJO_URL}/api/v2/import-scan/"
+            "${DEFECT_DOJO_URL}/api/v2/import-scan/" 
