@@ -1,4 +1,4 @@
-name: Generated Rules Scan 
+name: Generated Rules Scan  
 
 on:
   push:
