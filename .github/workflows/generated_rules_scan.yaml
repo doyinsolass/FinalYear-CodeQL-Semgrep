@@ -13,37 +13,89 @@ on:
 jobs:
   semgrep:
     runs-on: ubuntu-latest
-    env:
-      RULE_COUNT: ${{ github.event.inputs.rule_count || '20' }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.x"
+          python-version: '3.x'
 
-      - name: Install dependencies
-        run: pip install semgrep pyyaml jq
+      - name: Install Semgrep and tools
+        run: pip install semgrep jq
 
-      - name: Generate Semgrep YAML
+      - name: Write custom JavaScript security rules
         run: |
-          echo "Generating Semgrep rules for RULE_COUNT=$RULE_COUNT"
-          python generate_yaml.py
-      - name: Run Semgrep and save results
-        run: |
-          semgrep --config semgrep_scan.yaml --sarif > semgrep_results.sarif 2> semgrep_errors.log || true
-      - name: Show Semgrep errors
-        if: always()
-        run: |
-          echo "=== semgrep_errors.log ==="
-          if [ -f semgrep_errors.log ]; then
-            cat semgrep_errors.log
-          else
-            echo "No semgrep_errors.log"
-          fi
+          mkdir -p .semgrep
+          echo "rules:" > .semgrep/security-rules.yml
+          echo "  - id: detect-hardcoded-aws-secret-js" >> .semgrep/security-rules.yml
+          echo "    pattern: const aws_secret_access_key = \"\$SECRET\"" >> .semgrep/security-rules.yml
+          echo "    message: \"Hardcoded AWS secret detected.\"" >> .semgrep/security-rules.yml
+          echo "    severity: ERROR" >> .semgrep/security-rules.yml
+          echo "    languages: [javascript]" >> .semgrep/security-rules.yml
+          echo "" >> .semgrep/security-rules.yml
+          echo "  - id: detect-console-log-debug" >> .semgrep/security-rules.yml
+          echo "    pattern: console.log(\$X)" >> .semgrep/security-rules.yml
+          echo "    message: \"Debug console.log statement found; remove before production.\"" >> .semgrep/security-rules.yml
+          echo "    severity: WARNING" >> .semgrep/security-rules.yml
+          echo "    languages: [javascript]" >> .semgrep/security-rules.yml
+          echo "" >> .semgrep/security-rules.yml
+          echo "  - id: detect-eval-usage-js" >> .semgrep/security-rules.yml
+          echo "    pattern: eval(\$EXPR)" >> .semgrep/security-rules.yml
+          echo "    message: \"Use of eval() can lead to code injection vulnerabilities.\"" >> .semgrep/security-rules.yml
+          echo "    severity: ERROR" >> .semgrep/security-rules.yml
+          echo "    languages: [javascript]" >> .semgrep/security-rules.yml
+          echo "" >> .semgrep/security-rules.yml
+          echo "  - id: detect-function-constructor" >> .semgrep/security-rules.yml
+          echo "    pattern: new Function(\$ARGS)" >> .semgrep/security-rules.yml
+          echo "    message: \"Use of Function constructor can lead to security issues.\"" >> .semgrep/security-rules.yml
+          echo "    severity: ERROR" >> .semgrep/security-rules.yml
+          echo "    languages: [javascript]" >> .semgrep/security-rules.yml
+          echo "" >> .semgrep/security-rules.yml
+          echo "  - id: detect-settimeout-string" >> .semgrep/security-rules.yml
+          echo "    pattern-either:" >> .semgrep/security-rules.yml
+          echo "      - pattern: setTimeout(\"\$CODE\", ...)" >> .semgrep/security-rules.yml
+          echo "      - pattern: setInterval(\"\$CODE\", ...)" >> .semgrep/security-rules.yml
+          echo "    message: \"Avoid using string arguments in setTimeout/setInterval; potential code injection.\"" >> .semgrep/security-rules.yml
+          echo "    severity: ERROR" >> .semgrep/security-rules.yml
+          echo "    languages: [javascript]" >> .semgrep/security-rules.yml
+          echo "" >> .semgrep/security-rules.yml
+          echo "  - id: detect-document-write-js" >> .semgrep/security-rules.yml
+          echo "    pattern: document.write(\$X)" >> .semgrep/security-rules.yml
+          echo "    message: \"document.write() can lead to XSS vulnerabilities.\"" >> .semgrep/security-rules.yml
+          echo "    severity: ERROR" >> .semgrep/security-rules.yml
+          echo "    languages: [javascript]" >> .semgrep/security-rules.yml
+          echo "" >> .semgrep/security-rules.yml
+          echo "  - id: detect-innerhtml-assignment" >> .semgrep/security-rules.yml
+          echo "    pattern: \$OBJ.innerHTML = \$VAL" >> .semgrep/security-rules.yml
+          echo "    message: \"Assignment to innerHTML can lead to XSS vulnerabilities.\"" >> .semgrep/security-rules.yml
+          echo "    severity: ERROR" >> .semgrep/security-rules.yml
+          echo "    languages: [javascript]" >> .semgrep/security-rules.yml
+          echo "" >> .semgrep/security-rules.yml
+          echo "  - id: detect-localstorage-usage" >> .semgrep/security-rules.yml
+          echo "    pattern: localStorage.setItem(\$KEY, \$VAL)" >> .semgrep/security-rules.yml
+          echo "    message: \"Avoid storing sensitive data in localStorage.\"" >> .semgrep/security-rules.yml
+          echo "    severity: WARNING" >> .semgrep/security-rules.yml
+          echo "    languages: [javascript]" >> .semgrep/security-rules.yml
+          echo "" >> .semgrep/security-rules.yml
+          echo "  - id: detect-unsafe-regex" >> .semgrep/security-rules.yml
+          echo "    pattern: new RegExp(\$PATTERN)" >> .semgrep/security-rules.yml
+          echo "    message: \"Potentially unsafe regular expression. Validate input or use static patterns.\"" >> .semgrep/security-rules.yml
+          echo "    severity: WARNING" >> .semgrep/security-rules.yml
+          echo "    languages: [javascript]" >> .semgrep/security-rules.yml
+          echo "" >> .semgrep/security-rules.yml
+          echo "  - id: detect-insecure-http" >> .semgrep/security-rules.yml
+          echo "    pattern: fetch(\"http://\$URL\", ...)" >> .semgrep/security-rules.yml
+          echo "    message: \"Use HTTPS instead of HTTP for secure data transmission.\"" >> .semgrep/security-rules.yml
+          echo "    severity: ERROR" >> .semgrep/security-rules.yml
+          echo "    languages: [javascript]" >> .semgrep/security-rules.yml
+
+      - name: Run Semgrep with custom rules and generate SARIF report
+        run: semgrep --config=.semgrep/security-rules.yml --sarif --output=semgrep_results.sarif
+        continue-on-error: true
+
       - name: Count Semgrep vulnerabilities
         run: |
           if [ ! -f semgrep_results.sarif ]; then
@@ -54,24 +106,27 @@ jobs:
           count=$(jq '.runs[0].results | length' semgrep_results.sarif 2>/dev/null || echo 0)
           echo "Semgrep findings: $count"
           echo "semgrep_findings=$count" >> $GITHUB_ENV
-      - name: Upload Semgrep results as artifact
+
+      - name: Upload Semgrep SARIF as artifact
         uses: actions/upload-artifact@v4
         with:
           name: semgrep-findings
           path: semgrep_results.sarif
 
-      - name: Show Semgrep summary
+      - name: Display Semgrep scan summary
         if: always()
         run: |
-          echo "### Semgrep Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "### 🧾 Semgrep Security Scan Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Total Vulnerabilities Found (Semgrep):** ${{ env.semgrep_findings }}" >> $GITHUB_STEP_SUMMARY
+          findings_count=${{ env.semgrep_findings }}
+          echo "**Total Vulnerabilities Found:** $findings_count" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ env.semgrep_findings }}" -gt 0 ]; then
-            echo "Some vulnerabilities were detected by Semgrep. Review semgrep_results.sarif for details." >> $GITHUB_STEP_SUMMARY
+          if [ "$findings_count" -gt 0 ]; then
+            echo "⚠️ Vulnerabilities were detected. Please review the Semgrep SARIF report." >> $GITHUB_STEP_SUMMARY
           else
-            echo "No vulnerabilities detected by Semgrep." >> $GITHUB_STEP_SUMMARY
+            echo "✅ No vulnerabilities detected by Semgrep." >> $GITHUB_STEP_SUMMARY
           fi
+
   codeql:
     runs-on: ubuntu-latest
     needs: semgrep
@@ -125,6 +180,7 @@ jobs:
         run: |
           echo "Listing files after artifact download:"
           ls -R .
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -137,6 +193,7 @@ jobs:
         run: |
           echo "Merging semgrep_results.sarif and codeql-results.sarif into merged.sarif"
           python merge_sarif.py
+
       - name: Upload merged SARIF as artifact
         uses: actions/upload-artifact@v4
         with:
@@ -157,11 +214,13 @@ jobs:
         run: |
           echo "Listing files before upload:"
           ls -R .
+
       - name: Install jq (fast)
         run: |
           curl -L -o jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
           chmod +x jq
           sudo mv jq /usr/local/bin
+
       - name: Upload merged SARIF to DefectDojo
         env:
           DEFECT_DOJO_URL: ${{ secrets.DEFECT_DOJO_URL }}
@@ -173,7 +232,7 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{"username": "'"${DEFECT_DOJO_USERNAME}"'", "password": "'"${DEFECT_DOJO_PASSWORD}"'"}' \
             "${DEFECT_DOJO_URL}/api/v2/api-token-auth/" | jq -r .token)
-          if [ "$TOKEN" = "null" ] || [ -z "$TOKEN" ]; then
+          if [ "$TOKEN" = "null" ] || [ - z "$TOKEN" ]; then
             echo "Failed to obtain DefectDojo token"
             exit 1
           fi
@@ -185,4 +244,4 @@ jobs:
             -F "scan_type=SARIF" \
             -F "product_name=FinalYear-CodeQL-Semgrep" \
             -F "engagement_name=Generated Rules Scan" \
-            "${DEFECT_DOJO_URL}/api/v2/import-scan/" 
+            "${DEFECT_DOJO_URL}/api/v2/import-scan/"
