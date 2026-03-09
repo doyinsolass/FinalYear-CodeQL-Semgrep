@@ -1,6 +1,9 @@
 import javascript
 import semmle.javascript.security.dataflow.TaintTracking
 
+/**
+ * User input sources: req.query, req.body, req.params
+ */
 class UserInputSource extends TaintTracking::SourceNode {
   UserInputSource() {
     exists(Expr e |
@@ -14,6 +17,9 @@ class UserInputSource extends TaintTracking::SourceNode {
   }
 }
 
+/**
+ * SQL query sink: db.query/connection.query/execute(arg0)
+ */
 class SqlQuerySink extends TaintTracking::SinkNode {
   SqlQuerySink() {
     exists(FunctionCall call, Expr arg |
@@ -36,9 +42,9 @@ where
 select sink1,
   "R001: User input flows into a SQL query. Possible injection."
 
-
-import semmle.javascript.security.dataflow.TaintTracking
-
+/**
+ * Template literal SQL sink
+ */
 class TemplateLiteralSqlSink extends TaintTracking::SinkNode {
   TemplateLiteralSqlSink() {
     exists(TemplateLiteral t, FunctionCall call |
@@ -60,7 +66,9 @@ where
 select sink2,
   "R002: User input flows into a template literal used as a SQL query."
 
-
+/**
+ * Command execution sink: child_process.exec/execSync/spawn
+ */
 class CommandSink extends TaintTracking::SinkNode {
   CommandSink() {
     exists(FunctionCall call, Expr cmdArg |
@@ -84,7 +92,9 @@ where
 select sink3,
   "R003: User input flows into a shell command."
 
-
+/**
+ * Mongo-style query sink
+ */
 class MongoQuerySink extends TaintTracking::SinkNode {
   MongoQuerySink() {
     exists(FunctionCall call, Expr arg |
@@ -108,7 +118,9 @@ where
 select sink4,
   "R004: User input flows into a Mongo-style query object."
 
-
+/**
+ * Hard-coded JWT secret
+ */
 from CallExpr call5
 where
   call5.getCallee().getQualifiedName().matches("%jwt.sign%") and
@@ -120,7 +132,9 @@ where
 select call5,
   "R005: Hard-coded JWT secret."
 
-
+/**
+ * Weak hash algorithms
+ */
 from CallExpr call6
 where
   call6.getCallee().getQualifiedName().matches("%crypto.createHash%") and
@@ -135,19 +149,25 @@ where
 select call6,
   "R006: Weak hash algorithm used."
 
-
+/**
+ * Math.random used for token/secret
+ */
 from CallExpr call7
 where
   call7.getCallee().getQualifiedName().matches("%Math.random%") and
   exists(Expr e |
     e = call7.getParent() and
-    e.toString().matches("%token%") or
-    e.toString().matches("%secret%")
+    (
+      e.toString().matches("%token%") or
+      e.toString().matches("%secret%")
+    )
   )
 select call7,
   "R007: Math.random() used for token/secret generation."
 
-
+/**
+ * TLS verification disabled
+ */
 from ObjectLiteral obj8, Property p8
 where
   p8 = obj8.getAProperty() and
@@ -159,7 +179,9 @@ where
 select obj8,
   "R008: TLS verification disabled (rejectUnauthorized: false)."
 
-
+/**
+ * Possible logging of sensitive data
+ */
 from CallExpr call9
 where
   call9.getCallee().getName() = "log" and
@@ -174,7 +196,9 @@ where
 select call9,
   "R009: Possible logging of sensitive data."
 
-
+/**
+ * Cookie without HttpOnly
+ */
 from Expr cookie10
 where
   cookie10.toString().matches("%res.cookie%") and
