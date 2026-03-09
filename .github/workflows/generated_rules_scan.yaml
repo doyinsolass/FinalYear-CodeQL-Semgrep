@@ -199,5 +199,3 @@ jobs:
             -F "product_name=FinalYear-CodeQL-Semgrep" \
             -F "engagement_name=Generated Rules Scan" \
             "${DEFECT_DOJO_URL}/api/v2/import-scan/"
-
-          echo "Upload completed."
