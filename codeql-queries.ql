@@ -36,7 +36,6 @@ where
 select sink1,
   "R001: User input flows into a SQL query. Possible injection."
 
-///////////////////////////////////////////////////////////////////////////////
 
 import semmle.javascript.security.dataflow.TaintTracking
 
@@ -61,7 +60,6 @@ where
 select sink2,
   "R002: User input flows into a template literal used as a SQL query."
 
-///////////////////////////////////////////////////////////////////////////////
 
 class CommandSink extends TaintTracking::SinkNode {
   CommandSink() {
@@ -86,7 +84,6 @@ where
 select sink3,
   "R003: User input flows into a shell command."
 
-///////////////////////////////////////////////////////////////////////////////
 
 class MongoQuerySink extends TaintTracking::SinkNode {
   MongoQuerySink() {
@@ -111,7 +108,6 @@ where
 select sink4,
   "R004: User input flows into a Mongo-style query object."
 
-///////////////////////////////////////////////////////////////////////////////
 
 from CallExpr call5
 where
@@ -124,7 +120,6 @@ where
 select call5,
   "R005: Hard-coded JWT secret."
 
-///////////////////////////////////////////////////////////////////////////////
 
 from CallExpr call6
 where
@@ -140,7 +135,6 @@ where
 select call6,
   "R006: Weak hash algorithm used."
 
-///////////////////////////////////////////////////////////////////////////////
 
 from CallExpr call7
 where
@@ -153,7 +147,6 @@ where
 select call7,
   "R007: Math.random() used for token/secret generation."
 
-///////////////////////////////////////////////////////////////////////////////
 
 from ObjectLiteral obj8, Property p8
 where
@@ -166,7 +159,6 @@ where
 select obj8,
   "R008: TLS verification disabled (rejectUnauthorized: false)."
 
-///////////////////////////////////////////////////////////////////////////////
 
 from CallExpr call9
 where
@@ -182,7 +174,6 @@ where
 select call9,
   "R009: Possible logging of sensitive data."
 
-///////////////////////////////////////////////////////////////////////////////
 
 from Expr cookie10
 where
