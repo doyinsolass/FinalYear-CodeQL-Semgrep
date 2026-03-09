@@ -1,8 +1,8 @@
-name: Generated Rules Scan 
+name: Generated Rules Scan
 
 on:
   push:
-  pull_request: 
+  pull_request:
   workflow_dispatch:
     inputs:
       rule_count:
@@ -30,15 +30,19 @@ jobs:
 
       - name: Generate Semgrep YAML
         run: |
+          echo "Generating Semgrep rules for RULE_COUNT=$RULE_COUNT"
           python generate_yaml.py
+
       - name: Run Semgrep and save results
         run: semgrep --config semgrep_scan.yaml --sarif > semgrep_results.sarif
         continue-on-error: true
 
-      - name: Count vulnerabilities
+      - name: Count Semgrep vulnerabilities
         run: |
           count=$(jq '.runs[0].results | length' semgrep_results.sarif)
-          echo "findings=$count" >> $GITHUB_ENV
+          echo "Semgrep findings: $count"
+          echo "semgrep_findings=$count" >> $GITHUB_ENV
+
       - name: Upload Semgrep results as artifact
         uses: actions/upload-artifact@v4
         with:
@@ -50,55 +54,131 @@ jobs:
         run: |
           echo "### Semgrep Scan Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Total Vulnerabilities Found:** ${{ env.findings }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Total Vulnerabilities Found (Semgrep):** ${{ env.semgrep_findings }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ env.findings }}" -gt 0 ]; then
-            echo "Some vulnerabilities were detected. Review semgrep_results.sarif for details." >> $GITHUB_STEP_SUMMARY
+          if [ "${{ env.semgrep_findings }}" -gt 0 ]; then
+            echo "Some vulnerabilities were detected by Semgrep. Review semgrep_results.sarif for details." >> $GITHUB_STEP_SUMMARY
           else
-            echo "No vulnerabilities detected." >> $GITHUB_STEP_SUMMARY
+            echo "No vulnerabilities detected by Semgrep." >> $GITHUB_STEP_SUMMARY
           fi
-  defectdojo-upload:
-    runs-on: self-hosted
+
+  codeql:
+    runs-on: ubuntu-latest
     needs: semgrep
+    continue-on-error: true
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
 
     steps:
-      - name: Download SARIF artifact
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript,java
+          queries: ./codeql-queries
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          output: codeql-results.sarif
+
+      - name: Upload CodeQL results as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-findings
+          path: codeql-results.sarif
+
+  merge-sarif:
+    runs-on: ubuntu-latest
+    needs: [semgrep, codeql]
+
+    steps:
+      - name: Download Semgrep SARIF artifact
         uses: actions/download-artifact@v4
         with:
           name: semgrep-findings
 
-      - name: Verify SARIF exists
-        run: ls -R .
+      - name: Download CodeQL SARIF artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: codeql-findings
+
+      - name: Verify downloaded files
+        run: |
+          echo "Listing files after artifact download:"
+          ls -R .
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install merge dependencies
+        run: pip install jq
+
+      - name: Merge Semgrep and CodeQL SARIF
+        run: |
+          echo "Merging semgrep_results.sarif and codeql-results.sarif into merged.sarif"
+          python merge_sarif.py
+
+      - name: Upload merged SARIF as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: merged-sarif
+          path: merged.sarif
+
+  defectdojo-upload:
+    runs-on: self-hosted
+    needs: merge-sarif
+
+    steps:
+      - name: Download merged SARIF artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: merged-sarif
+
+      - name: Verify merged SARIF exists
+        run: |
+          echo "Listing files before upload:"
+          ls -R .
 
       - name: Install jq (fast)
         run: |
           curl -L -o jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
           chmod +x jq
           sudo mv jq /usr/local/bin
-      - name: Debug secret names
-        run: |
-          echo "Secrets available:"
-          echo "${{ toJson(secrets) }}"
-      - name: Upload SARIF to DefectDojo (manual)
+
+      - name: Upload merged SARIF to DefectDojo
         env:
           DEFECT_DOJO_URL: ${{ secrets.DEFECT_DOJO_URL }}
           DEFECT_DOJO_USERNAME: ${{ secrets.DEFECT_DOJO_USERNAME }}
           DEFECT_DOJO_PASSWORD: ${{ secrets.DEFECT_DOJO_PASSWORD }}
         run: |
           echo "Authenticating with DefectDojo..."
-      
+
           TOKEN=$(curl -s -X POST \
             -H "Content-Type: application/json" \
             -d '{"username": "'"${DEFECT_DOJO_USERNAME}"'", "password": "'"${DEFECT_DOJO_PASSWORD}"'"}' \
             "${DEFECT_DOJO_URL}/api/v2/api-token-auth/" | jq -r .token)
-      
+
+          if [ "$TOKEN" = "null" ] || [ -z "$TOKEN" ]; then
+            echo "Failed to obtain DefectDojo token"
+            exit 1
+          fi
+
           echo "Token received: ${#TOKEN} characters"
-      
-          echo "Uploading SARIF..."
+
+          echo "Uploading merged.sarif to DefectDojo..."
           curl -s -X POST \
             -H "Authorization: Token $TOKEN" \
-            -F "file=@semgrep_results.sarif" \
+            -F "file=@merged.sarif" \
             -F "scan_type=SARIF" \
             -F "product_name=FinalYear-CodeQL-Semgrep" \
-            -F "engagement_name=import" \
+            -F "engagement_name=Generated Rules Scan" \
             "${DEFECT_DOJO_URL}/api/v2/import-scan/"
+
+          echo "Upload completed."
