@@ -33,6 +33,11 @@ jobs:
           echo "Generating Semgrep rules for RULE_COUNT=$RULE_COUNT"
           python generate_yaml.py
 
+      - name: Show generated Semgrep config
+        run: |
+          echo "=== semgrep_scan.yaml ==="
+          cat semgrep_scan.yaml
+
       - name: Run Semgrep and save results
         run: |
           semgrep --config semgrep_scan.yaml --sarif > semgrep_results.sarif 2> semgrep_errors.log || true
@@ -178,19 +183,15 @@ jobs:
           DEFECT_DOJO_PASSWORD: ${{ secrets.DEFECT_DOJO_PASSWORD }}
         run: |
           echo "Authenticating with DefectDojo..."
-
           TOKEN=$(curl -s -X POST \
             -H "Content-Type: application/json" \
             -d '{"username": "'"${DEFECT_DOJO_USERNAME}"'", "password": "'"${DEFECT_DOJO_PASSWORD}"'"}' \
             "${DEFECT_DOJO_URL}/api/v2/api-token-auth/" | jq -r .token)
-
           if [ "$TOKEN" = "null" ] || [ -z "$TOKEN" ]; then
             echo "Failed to obtain DefectDojo token"
             exit 1
           fi
-
           echo "Token received: ${#TOKEN} characters"
-
           echo "Uploading merged.sarif to DefectDojo..."
           curl -s -X POST \
             -H "Authorization: Token $TOKEN" \
