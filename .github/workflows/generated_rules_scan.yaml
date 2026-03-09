@@ -232,7 +232,7 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{"username": "'"${DEFECT_DOJO_USERNAME}"'", "password": "'"${DEFECT_DOJO_PASSWORD}"'"}' \
             "${DEFECT_DOJO_URL}/api/v2/api-token-auth/" | jq -r .token)
-          if [ "$TOKEN" = "null" ] || [ - z "$TOKEN" ]; then
+          if [ "$TOKEN" = "null" ] || [ -z "$TOKEN" ]; then
             echo "Failed to obtain DefectDojo token"
             exit 1
           fi
@@ -243,5 +243,5 @@ jobs:
             -F "file=@merged.sarif" \
             -F "scan_type=SARIF" \
             -F "product_name=FinalYear-CodeQL-Semgrep" \
-            -F "engagement_name=Generated Rules Scan" \
+            -F "engagement_name=import" \
             "${DEFECT_DOJO_URL}/api/v2/import-scan/"
