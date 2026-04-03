@@ -1,4 +1,4 @@
-import mysql.connector
+import mysql.connector 
 
 def get_user(user_id):
     connection = mysql.connector.connect(
